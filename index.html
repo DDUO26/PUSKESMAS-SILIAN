@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Workforce Management - Realtime Dashboard</title>
+    
+    <!-- Cegah Memori Cache Nyangkut di HP -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter & Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- FIREBASE SDK (For Real-time Online Sync) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Poppins', 'sans-serif']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
+                            500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
+                        },
+                        darkBg: '#020617', 
+                        success: '#10B981',
+                        warning: '#F59E0B',
+                        danger: '#EF4444',
+                        pagi: '#3B82F6',
+                        sore: '#F59E0B',
+                        malam: '#8B5CF6',
+                        libur: '#94A3B8'
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 20px rgba(37, 99, 235, 0.5)',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Premium Apple-like Glassmorphism */
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
+        }
+        .dark .glass-panel { 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 100%);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+        .dark .glass-card {
+            background: linear-gradient(145deg, rgba(30,41,59,0.7) 0%, rgba(15,23,42,0.4) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* SPA View Transitions */
+        .view-section { display: none; }
+        .view-section.active { display: block; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        .matrix-cell { width: 44px; min-width: 44px; text-align: center; }
+        .sticky-col { position: sticky; left: 0; z-index: 20; }
+        .sticky-header { position: sticky; top: 0; z-index: 30; }
+        
+        .card-lift { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-lift:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.1); }
+        .dark .card-lift:hover { box-shadow: 0 12px 24px -8px rgba(0,0,0,0.5); }
+
+        input:focus, select:focus {
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); border-color: #3b82f6; outline: none;
+        }
+        .dark input:focus, .dark select:focus {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); border-color: #60a5fa;
+        }
+        
+        /* Mobile Height Fix */
+        body { height: 100dvh; }
+    </style>
+</head>
+
+<body class="bg-[#F1F5F9] dark:bg-darkBg text-slate-800 dark:text-slate-200 transition-colors duration-300 font-sans overflow-hidden flex selection:bg-brand-500 selection:text-white">
+
+    <div class="flex w-full h-full p-2 md:p-4 gap-4">
+        
+        <!-- MOBILE OVERLAY BACKDROP -->
+        <div id="mobileOverlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-slate-900/60 z-[90] hidden md:hidden backdrop-blur-sm transition-opacity"></div>
+
+        <!-- SIDEBAR -->
+        <aside id="mainSidebar" class="fixed md:relative top-0 left-0 h-full w-72 flex flex-col rounded-r-[24px] md:rounded-[24px] glass-panel z-[100] md:z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out overflow-hidden shadow-2xl md:shadow-none bg-white/95 dark:bg-slate-900/95 md:bg-transparent">
+            <div class="p-6 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-teal-400 flex items-center justify-center text-white shadow-glow">
+                        <i data-lucide="activity" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-display font-bold text-xl leading-tight tracking-tight text-slate-900 dark:text-white">DutyFlow</h1>
+                        <p class="text-[10px] text-brand-600 dark:text-brand-400 font-bold tracking-wide uppercase flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> Auto-Sync</p>
+                    </div>
+                </div>
+                <!-- Tombol tutup menu mobile -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-slate-500 hover:text-danger bg-slate-100 dark:bg-slate-800 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
+                <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Main Menu</p>
+                
+                <button onclick="switchView('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                    <i data-lucide="layout-grid" class="w-5 h-5 group-hover:text-brand-500 transition-colors"></i> <span>Overview</span>
+                </button>
+                <button onclick="switchView('kalender')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                    <i data-lucide="calendar-clock" class="w-5 h-5 group-hover:text-brand-500 transition-colors"></i> <span>Master Jadwal</span>
+                </button>
+                <button onclick="switchView('perawat')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                    <i data-lucide="users-2" class="w-5 h-5 group-hover:text-brand-500 transition-colors"></i> <span>Direktori Staf</span>
+                </button>
+                
+                <p class="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-6 mb-2">Manajemen</p>
+
+                <button onclick="switchView('aksi')" class="nav-btn w-full flex items-center justify-between px-4 py-3 rounded-xl text-left font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="arrow-left-right" class="w-5 h-5 group-hover:text-warning transition-colors"></i> <span>Rencana & Aksi</span>
+                    </div>
+                    <span id="pendingSwapBadge" class="hidden bg-warning/20 text-warning text-xs font-bold px-2 py-0.5 rounded-full">!</span>
+                </button>
+                <button onclick="switchView('laporan')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                    <i data-lucide="line-chart" class="w-5 h-5 group-hover:text-success transition-colors"></i> <span>Analitik & Laporan</span>
+                </button>
+
+                <button onclick="switchView('pengaturan')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 mt-2 rounded-xl text-left font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all group">
+                    <i data-lucide="settings" class="w-5 h-5 group-hover:text-slate-800 dark:group-hover:text-white transition-colors"></i> <span>Pengaturan Sistem</span>
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-slate-200/50 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/50">
+                <button id="themeToggle" class="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="moon" class="w-4 h-4 text-slate-500 dark:text-brand-400 hidden dark:block"></i>
+                        <i data-lucide="sun" class="w-4 h-4 text-warning block dark:hidden"></i>
+                        <span class="dark:hidden">Switch to Dark</span>
+                        <span class="hidden dark:block">Switch to Light</span>
+                    </span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col h-full overflow-hidden relative rounded-[24px] z-10 w-full">
+            
+            <header class="h-20 px-4 md:px-6 lg:px-10 flex items-center justify-between glass-panel rounded-t-[24px] md:rounded-[24px] border-b-0 md:mb-4 z-30 flex-shrink-0 relative w-full">
+                <div class="flex items-center gap-3 md:gap-4">
+                    <!-- Tombol Hamburger Menu (Hanya muncul di Mobile) -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm"><i data-lucide="menu"></i></button>
+                    <div>
+                        <h2 id="greetingText" class="text-base md:text-lg lg:text-xl font-display font-bold text-slate-800 dark:text-white truncate max-w-[150px] md:max-w-none">Halo, Admin</h2>
+                        <p id="currentDateText" class="text-[10px] md:text-xs lg:text-sm text-slate-500 flex items-center gap-1.5 font-medium">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5 hidden sm:block"></i> <span class="truncate">Memuat tanggal...</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3 md:gap-5">
+                    <div class="hidden lg:flex relative group">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400 group-focus-within:text-brand-500 transition-colors"></i>
+                        <input type="text" placeholder="Pencarian cepat..." class="w-64 pl-10 pr-4 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500/20 transition-all shadow-sm">
+                    </div>
+
+                    <!-- Notifikasi -->
+                    <div class="relative">
+                        <button onclick="toggleNotifDropdown()" class="relative p-2 md:p-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all">
+                            <i data-lucide="bell" class="w-4 h-4 md:w-5 md:h-5 text-slate-600 dark:text-slate-300"></i>
+                            <span id="headerNotifBadge" class="hidden absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
+                        </button>
+                        
+                        <div id="notifDropdown" class="hidden absolute right-[-50px] md:right-0 mt-2 w-72 md:w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+                            <div class="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                                <h4 class="font-bold text-sm text-slate-800 dark:text-white">Notifikasi Penebusan</h4>
+                                <span id="notifCount" class="text-xs font-bold bg-warning/20 text-warning px-2 py-0.5 rounded-full">0</span>
+                            </div>
+                            <div id="notifList" class="max-h-64 overflow-y-auto text-sm">
+                                <!-- JS injected -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 md:gap-3 md:pl-5 md:border-l border-slate-200 dark:border-slate-700">
+                        <div class="hidden md:block text-right">
+                            <p id="headerHeadName" class="text-sm font-semibold text-slate-800 dark:text-white leading-tight">Admin</p>
+                            <p class="text-[10px] text-brand-600 dark:text-brand-400 font-bold uppercase tracking-wide">Kepala Ruangan</p>
+                        </div>
+                        <div class="relative">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=2563EB&color=fff&rounded=true&bold=true" class="w-8 h-8 md:w-10 md:h-10 rounded-full shadow-md border-2 border-white dark:border-slate-800" id="headerAvatar">
+                            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 bg-success rounded-full border-2 border-white dark:border-slate-800"></div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Area -->
+            <div class="flex-1 overflow-y-auto px-4 md:px-6 pb-20 md:pb-6 rounded-b-[24px] md:rounded-[24px] custom-scrollbar w-full">
+                
+                <!-- 1. DASHBOARD VIEW -->
+                <section id="view-dashboard" class="view-section active space-y-6 animate-fade-in">
+                    <div class="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-brand-600 via-brand-500 to-teal-400 p-6 md:p-10 text-white shadow-xl shadow-brand-500/20 card-lift">
+                        <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 blur-3xl rounded-full"></div>
+                        <div class="absolute bottom-[-10%] right-[10%] w-64 h-64 bg-teal-300/20 blur-2xl rounded-full animate-float"></div>
+                        
+                        <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div>
+                                <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] md:text-xs font-bold tracking-wider uppercase mb-4 border border-white/30">Puskesmas Silian</span>
+                                <h2 class="text-2xl md:text-4xl font-display font-bold mb-2">Hospital Workforce Overview</h2>
+                                <p class="text-brand-50 max-w-lg text-xs md:text-base opacity-90">Sistem sinkronisasi awan memantau beban kerja dan rotasi perawat secara real-time.</p>
+                            </div>
+                            <div class="hidden sm:flex gap-4">
+                                <div class="bg-white border border-white/20 rounded-2xl p-4 text-center min-w-[120px] text-brand-900 shadow-lg">
+                                    <p class="text-xs uppercase tracking-wider font-bold opacity-60 mb-1">Status</p>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-success animate-pulse"></div>
+                                        <p class="text-lg font-display font-bold">Online</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic KPIs -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                        <div class="glass-card p-4 md:p-6 rounded-[20px] card-lift relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><i data-lucide="sun" class="w-12 h-12 md:w-16 md:h-16 text-blue-500"></i></div>
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div>
+                                    <p class="text-[10px] md:text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Shift Pagi</p>
+                                    <h3 id="kpiPagi" class="text-2xl md:text-4xl font-display font-bold text-slate-800 dark:text-white mt-1">0</h3>
+                                </div>
+                                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner"><i data-lucide="sun" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                            </div>
+                            <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1"><span class="text-blue-500 font-bold" id="timePagiDisplay">☀️ 07:00 - 14:00</span></p>
+                        </div>
+                        <div class="glass-card p-4 md:p-6 rounded-[20px] card-lift relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><i data-lucide="sunset" class="w-12 h-12 md:w-16 md:h-16 text-amber-500"></i></div>
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div>
+                                    <p class="text-[10px] md:text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Shift Sore</p>
+                                    <h3 id="kpiSore" class="text-2xl md:text-4xl font-display font-bold text-slate-800 dark:text-white mt-1">0</h3>
+                                </div>
+                                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-inner"><i data-lucide="sunset" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                            </div>
+                            <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1"><span class="text-amber-500 font-bold" id="timeSoreDisplay">🌤️ 14:00 - 21:00</span></p>
+                        </div>
+                        <div class="glass-card p-4 md:p-6 rounded-[20px] card-lift relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><i data-lucide="moon" class="w-12 h-12 md:w-16 md:h-16 text-purple-500"></i></div>
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div>
+                                    <p class="text-[10px] md:text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Shift Malam</p>
+                                    <h3 id="kpiMalam" class="text-2xl md:text-4xl font-display font-bold text-slate-800 dark:text-white mt-1">0</h3>
+                                </div>
+                                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-inner"><i data-lucide="moon" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                            </div>
+                            <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1"><span class="text-purple-500 font-bold" id="timeMalamDisplay">🌙 21:00 - 07:00</span></p>
+                        </div>
+                        <div class="glass-card p-4 md:p-6 rounded-[20px] card-lift relative overflow-hidden group border border-warning/30 bg-warning/5 dark:bg-warning/5">
+                            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><i data-lucide="alert-circle" class="w-12 h-12 md:w-16 md:h-16 text-warning"></i></div>
+                            <div class="flex justify-between items-start mb-4 relative z-10">
+                                <div>
+                                    <p class="text-[10px] md:text-sm font-semibold text-warning uppercase tracking-wider">Total Insiden</p>
+                                    <h3 id="kpiInsiden" class="text-2xl md:text-4xl font-display font-bold text-slate-800 dark:text-white mt-1">0</h3>
+                                </div>
+                                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-warning text-white flex items-center justify-center shadow-lg shadow-warning/30"><i data-lucide="alert-triangle" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                            </div>
+                            <p class="text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">Tukar, Sakit, Izin & Alpa</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts & Timeline -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 glass-panel p-6 md:p-8 rounded-[24px]">
+                            <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white mb-6">Beban Kerja Mingguan</h3>
+                            <div class="relative w-full h-[250px]">
+                                <canvas id="barChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-6 md:p-8 rounded-[24px] flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white mb-1 flex items-center gap-2">
+                                    <i data-lucide="users-2" class="text-brand-500 w-5 h-5"></i> Jadwal & Tukar Dinas
+                                </h3>
+                                <p class="text-xs text-slate-500 mb-4">Pegawai yang akan dinas / menukar minggu ini (1 - 7 Juni 2026)</p>
+                            </div>
+                            <div id="weeklyExchangeTimeline" class="flex-1 overflow-y-auto max-h-[200px] custom-scrollbar space-y-3 pr-1">
+                                <!-- JS Injected -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. KALENDER DINAS VIEW -->
+                <section id="view-kalender" class="view-section space-y-6 animate-fade-in">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 glass-panel p-4 md:p-6 rounded-[24px]">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-display font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                                <i data-lucide="calendar-days" class="text-brand-500"></i> Master Matriks Jadwal
+                            </h3>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">Sistem menyimpan jadwal Master secara terpusat. <span class="md:hidden text-brand-500 font-bold block mt-1">👉 Geser tabel ini (kiri-kanan) untuk melihat tanggal lainnya.</span></p>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-3 items-center">
+                            <!-- Tombol Reset Master menggantikan Upload PDF -->
+                            <button id="btnResetMaster" onclick="resetToMasterSchedule()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-medium text-sm transition-all flex items-center gap-2 shadow-lg shadow-brand-500/30 card-lift">
+                                <i data-lucide="database-restore" class="w-4 h-4"></i> <span class="hidden sm:inline">Reset ke Jadwal</span> Master
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-[24px] overflow-hidden border border-slate-200/60 dark:border-slate-700/60 shadow-soft">
+                        <div class="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 p-3 flex flex-wrap gap-3 text-[10px] md:text-xs font-semibold text-slate-600 dark:text-slate-300">
+                            <div class="flex items-center gap-1.5"><span class="px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">☀️ Pagi</span></div>
+                            <div class="flex items-center gap-1.5"><span class="px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">🌤️ Sore</span></div>
+                            <div class="flex items-center gap-1.5"><span class="px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">🌙 Malam</span></div>
+                            <div class="flex items-center gap-1.5"><span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400">🏖️ Libur</span></div>
+                            <div class="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1 hidden sm:block"></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-warning border border-white dark:border-slate-800 shadow-sm"></span> Menunggu Tebusan</div>
+                            <div class="flex items-center gap-1.5"><span class="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-success border border-white dark:border-slate-800 shadow-sm"></span> Selesai Tukar</div>
+                        </div>
+                        
+                        <div class="overflow-x-auto custom-scrollbar pb-2">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-white/50 dark:bg-slate-900/50 text-[10px] md:text-[11px] text-slate-500 uppercase tracking-wider font-bold">
+                                        <th class="p-3 md:p-4 sticky-header sticky-col glass-panel shadow-sm min-w-[150px] md:min-w-[220px] border-b border-r border-slate-200 dark:border-slate-700 z-30">Profil Pegawai</th>
+                                        <script>
+                                            const namaHari = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+                                            for(let i=1; i<=30; i++) {
+                                                let hari = namaHari[(i-1) % 7];
+                                                document.write(`<th class="py-2 px-0.5 md:px-1 sticky-header border-b border-slate-200 dark:border-slate-700 glass-panel matrix-cell text-center"><div class="text-[8px] md:text-[9px] text-slate-400 mb-1">${hari}</div><span class="w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 mx-auto">${i}</span></th>`);
+                                            }
+                                            document.write(`<th class="p-3 md:p-4 sticky-header border-b border-slate-200 dark:border-slate-700 glass-panel min-w-[70px] md:min-w-[80px] text-center text-brand-600 dark:text-brand-400">Tot Hari</th>`);
+                                            document.write(`<th class="p-3 md:p-4 sticky-header border-b border-slate-200 dark:border-slate-700 glass-panel min-w-[80px] md:min-w-[100px] text-center text-brand-600 dark:text-brand-400">Tot Jam</th>`);
+                                        </script>
+                                    </tr>
+                                </thead>
+                                <tbody id="matrixTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/50 bg-white/30 dark:bg-slate-900/30">
+                                    <!-- JS Generated -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. DATA PERAWAT VIEW -->
+                <section id="view-perawat" class="view-section space-y-6 animate-fade-in">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+                        <div>
+                            <h3 class="text-xl font-display font-bold text-slate-800 dark:text-white">Direktori Staf</h3>
+                        </div>
+                        <div class="relative group w-full sm:w-auto">
+                            <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="searchNurse" placeholder="Cari nama perawat..." class="w-full sm:w-72 pl-10 pr-4 py-2.5 rounded-xl glass-panel text-sm focus:ring-2 focus:ring-brand-500 transition-all">
+                        </div>
+                    </div>
+                    <div id="nurseGridContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"></div>
+                </section>
+
+                <!-- 4. RENCANA & AKSI VIEW -->
+                <section id="view-aksi" class="view-section space-y-6 animate-fade-in">
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:items-start">
+                        <!-- Form Area -->
+                        <div class="glass-panel p-5 md:p-8 rounded-[24px] xl:sticky xl:top-24 border border-slate-200/50 dark:border-slate-700/50 relative">
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-brand-50 dark:bg-brand-900/20 text-brand-600 flex items-center justify-center mb-6">
+                                <i data-lucide="file-edit" class="w-5 h-5 md:w-6 md:h-6"></i>
+                            </div>
+                            <h3 class="text-lg md:text-xl font-display font-bold mb-2">Catat Kejadian</h3>
+                            <form id="actionForm" class="space-y-4 md:space-y-5">
+                                <div>
+                                    <label class="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 md:mb-2">Pegawai Pemohon</label>
+                                    <select id="actionNurse" required class="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none"></select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3 md:gap-4">
+                                    <div>
+                                        <label class="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 md:mb-2">Tgl Awal (Jun)</label>
+                                        <input type="number" id="actionDate" min="1" max="30" required placeholder="Tgl" class="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 md:mb-2">Kejadian</label>
+                                        <select id="actionType" required class="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none" onchange="toggleSwapFields()">
+                                            <option value="">Pilih...</option>
+                                            <option value="Tukar Dinas">Tukar Dinas</option>
+                                            <option value="Sakit">Sakit</option>
+                                            <option value="Izin">Izin</option>
+                                            <option value="Alpa">Alpa</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="previewOriginalShift" class="hidden overflow-hidden rounded-xl bg-brand-50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-800 p-3 md:p-4 text-xs"></div>
+
+                                <div id="swapFields" class="hidden space-y-4 md:space-y-5 bg-slate-50/50 dark:bg-slate-800/30 p-4 md:p-5 rounded-xl border border-slate-200 dark:border-slate-700">
+                                    <div>
+                                        <label class="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 md:mb-2">Digantikan Oleh</label>
+                                        <select id="actionSwapWith" class="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none"></select>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3 md:gap-4">
+                                        <div>
+                                            <label class="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 md:mb-2">Tgl Tebus</label>
+                                            <input type="number" id="actionRepayDate" min="1" max="30" placeholder="Opsional" class="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 md:mb-2">Status Awal</label>
+                                            <select id="actionStatus" class="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[10px] md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                                <option value="Belum Masuk">Belum Masuk</option>
+                                                <option value="Sudah Masuk">Sudah Masuk</option>
+                                                <option value="Sudah Ditebus">Sudah Ditebus</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] md:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 md:mb-2">Catatan Tambahan</label>
+                                    <input type="text" id="actionNotes" placeholder="Keterangan..." class="w-full px-3 md:px-4 py-2.5 md:py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                </div>
+                                <button type="submit" class="w-full py-3 md:py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg transition-all hover:-translate-y-0.5 text-sm md:text-base">Simpan Transaksi</button>
+                            </form>
+                        </div>
+
+                        <!-- Table Area -->
+                        <div class="xl:col-span-2 glass-panel p-4 md:p-6 lg:p-8 rounded-[24px]">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                                <h3 class="text-lg md:text-xl font-display font-bold text-slate-800 dark:text-white">Status Integritas Staf</h3>
+                                <button onclick="printIntegritas()" type="button" class="px-3 md:px-4 py-2 bg-brand-50 hover:bg-brand-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-brand-600 dark:text-brand-400 rounded-xl text-[10px] md:text-xs font-bold transition-all flex items-center gap-2 border border-brand-200 dark:border-slate-600 shadow-sm">
+                                    <i data-lucide="printer" class="w-3 h-3 md:w-4 md:h-4"></i> Print Laporan (PDF)
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto relative rounded-xl" id="integritasTableWrapper">
+                                <!-- Tulisan panduan swipe di mobile -->
+                                <p class="md:hidden text-[10px] text-brand-500 font-bold mb-2 flex items-center gap-1"><i data-lucide="arrow-left-right" class="w-3 h-3"></i> Geser tabel ke kanan untuk detail</p>
+                                <table class="w-full text-left text-[11px] md:text-sm" id="integritasTable">
+                                    <thead>
+                                        <tr class="border-b border-slate-200 dark:border-slate-700 text-[9px] md:text-[11px] uppercase tracking-wider font-bold text-slate-400">
+                                            <th class="pb-3 md:pb-4 px-2 md:px-4">Nama Pegawai</th>
+                                            <th class="pb-3 md:pb-4 text-center">Tukar</th>
+                                            <th class="pb-3 md:pb-4 text-center">Sakit</th>
+                                            <th class="pb-3 md:pb-4 text-center">Izin</th>
+                                            <th class="pb-3 md:pb-4 text-center">Alpa</th>
+                                            <th class="pb-3 md:pb-4 px-2 md:px-4 min-w-[200px]">Keterangan (Tukar Terakhir)</th>
+                                            <th class="pb-3 md:pb-4 text-right px-2 md:px-4 no-print"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="actionSummaryTable" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. ANALITIK & LAPORAN VIEW -->
+                <section id="view-laporan" class="view-section space-y-6 animate-fade-in">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                        <div class="glass-card p-4 md:p-5 rounded-[16px] md:rounded-[20px] flex justify-between card-lift">
+                            <div><p class="text-[10px] md:text-xs font-bold uppercase text-slate-400">Tukar</p><h3 id="statTukar" class="text-2xl md:text-3xl font-display font-bold text-brand-600">0</h3></div>
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-500"><i data-lucide="arrow-left-right" class="w-5 h-5"></i></div>
+                        </div>
+                        <div class="glass-card p-4 md:p-5 rounded-[16px] md:rounded-[20px] flex justify-between card-lift">
+                            <div><p class="text-[10px] md:text-xs font-bold uppercase text-slate-400">Sakit</p><h3 id="statSakit" class="text-2xl md:text-3xl font-display font-bold text-amber-500">0</h3></div>
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500"><i data-lucide="thermometer" class="w-5 h-5"></i></div>
+                        </div>
+                        <div class="glass-card p-4 md:p-5 rounded-[16px] md:rounded-[20px] flex justify-between card-lift">
+                            <div><p class="text-[10px] md:text-xs font-bold uppercase text-slate-400">Izin</p><h3 id="statIjin" class="text-2xl md:text-3xl font-display font-bold text-success">0</h3></div>
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-emerald-50 flex items-center justify-center text-success"><i data-lucide="calendar-off" class="w-5 h-5"></i></div>
+                        </div>
+                        <div class="glass-card p-4 md:p-5 rounded-[16px] md:rounded-[20px] flex justify-between card-lift border border-danger/20">
+                            <div><p class="text-[10px] md:text-xs font-bold uppercase text-danger">Alpa</p><h3 id="statAlpa" class="text-2xl md:text-3xl font-display font-bold text-danger">0</h3></div>
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-50 flex items-center justify-center text-danger"><i data-lucide="x-circle" class="w-5 h-5"></i></div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-4 md:p-6 lg:p-8 rounded-[24px]">
+                        <h3 class="text-lg md:text-xl font-display font-bold text-slate-800 dark:text-white mb-4 md:mb-6">Log Aktivitas Sistem</h3>
+                        <div class="overflow-x-auto">
+                            <!-- Tulisan panduan swipe di mobile -->
+                            <p class="md:hidden text-[10px] text-brand-500 font-bold mb-2 flex items-center gap-1"><i data-lucide="arrow-left-right" class="w-3 h-3"></i> Geser tabel ke kanan untuk melihat detail</p>
+                            <table class="w-full text-left text-xs md:text-sm">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700 text-[9px] md:text-[11px] uppercase font-bold text-slate-400">
+                                        <th class="pb-3 md:pb-4 w-16 md:w-24 px-2">Tanggal</th>
+                                        <th class="pb-3 md:pb-4 px-2">Pemohon</th>
+                                        <th class="pb-3 md:pb-4 px-2">Kejadian</th>
+                                        <th class="pb-3 md:pb-4 px-2 min-w-[200px]">Detail Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analyticsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. PENGATURAN SYSTEM -->
+                <section id="view-pengaturan" class="view-section space-y-6 animate-fade-in">
+                    <div class="mb-2">
+                        <h3 class="text-xl font-display font-bold text-slate-800 dark:text-white">Pengaturan Sistem</h3>
+                        <p class="text-sm text-slate-500">Personalisasi tampilan dan manajemen data aplikasi.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Profil & Waktu -->
+                        <div class="glass-panel p-6 rounded-[24px] space-y-6">
+                            <h4 class="font-bold text-slate-800 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">Hierarki Kepemimpinan & Waktu</h4>
+                            
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Kepala Puskesmas</label>
+                                    <input type="text" id="setKapusName" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Kepala Keperawatan</label>
+                                    <input type="text" id="setKaperName" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Kepala Ruangan (Tampil di Header)</label>
+                                    <input type="text" id="setKaruName" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-3 border-t border-slate-200 dark:border-slate-700 pt-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Jam Pagi</label>
+                                    <input type="text" id="setJamPagi" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Jam Sore</label>
+                                    <input type="text" id="setJamSore" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Jam Malam</label>
+                                    <input type="text" id="setJamMalam" class="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                </div>
+                            </div>
+                            <button onclick="saveSettings()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg transition-all">Simpan Pengaturan</button>
+                        </div>
+
+                        <!-- Backup & Restore -->
+                        <div class="glass-panel p-6 rounded-[24px] space-y-6">
+                            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                                <h4 class="font-bold text-slate-800 dark:text-white">Manajemen Data & Keamanan</h4>
+                                <span id="autoSaveIndicator" class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-warning inline-block animate-pulse"></span> Menghubungkan ke Cloud...
+                                </span>
+                            </div>
+                            
+                            <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <div class="flex gap-4 items-center mb-4">
+                                    <i data-lucide="database-backup" class="w-8 h-8 text-brand-500"></i>
+                                    <div>
+                                        <h5 class="font-bold text-sm">Backup / Export Database</h5>
+                                        <p class="text-xs text-slate-500">Unduh seluruh data dalam format JSON untuk cadangan lokal.</p>
+                                    </div>
+                                </div>
+                                <button onclick="backupData()" class="w-full py-2.5 border border-brand-500 text-brand-600 dark:text-brand-400 font-bold rounded-xl hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-all">Download Backup File</button>
+                            </div>
+
+                            <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <div class="flex gap-4 items-center mb-4">
+                                    <i data-lucide="folder-sync" class="w-8 h-8 text-warning"></i>
+                                    <div>
+                                        <h5 class="font-bold text-sm">Restore / Import Database</h5>
+                                        <p class="text-xs text-slate-500">Pulihkan sistem dari file JSON backup.</p>
+                                    </div>
+                                </div>
+                                <button onclick="document.getElementById('restoreFile').click()" class="w-full py-2.5 bg-slate-800 text-white dark:bg-white dark:text-slate-900 font-bold rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="upload" class="w-4 h-4"></i>
+                                    <span id="restoreBtnLabel">Pilih File Restore</span>
+                                </button>
+                                <input type="file" id="restoreFile" class="hidden" accept=".json" onchange="restoreData(event)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Names Grid -->
+                    <div class="glass-panel p-6 rounded-[24px]">
+                        <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4 mb-4">
+                            <h4 class="font-bold text-slate-800 dark:text-white">Ubah Nama Pegawai</h4>
+                            <p class="text-xs text-slate-500">Ganti nama di kotak dan tekan tombol "Simpan Nama" di sebelahnya.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="settingsNursesGrid">
+                            <!-- JS Injected -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: DAFTAR RIWAYAT AKSI -->
+    <div id="modalHistory" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onclick="closeHistoryModal()"></div>
+        <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[24px] md:rounded-[32px] shadow-2xl overflow-hidden animate-slide-up transform scale-100 border border-slate-200 dark:border-slate-700">
+            <div class="px-5 md:px-8 py-4 md:py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/20">
+                <h3 class="text-lg md:text-xl font-display font-bold text-slate-800 dark:text-white" id="modalHistoryTitle">Riwayat Pegawai</h3>
+                <button onclick="closeHistoryModal()" class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500"><i data-lucide="x" class="w-4 h-4 md:w-5 md:h-5"></i></button>
+            </div>
+            <div class="p-4 md:p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div id="modalHistoryBody" class="space-y-4"></div>
+                <div id="modalHistoryEmpty" class="hidden flex-col items-center justify-center py-12 text-slate-400 text-center">
+                    <i data-lucide="check-circle-2" class="w-8 h-8 md:w-10 md:h-10 text-success opacity-50 mb-2"></i>
+                    <p class="font-semibold text-base md:text-lg text-slate-600 dark:text-slate-300">Catatan Bersih</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 -translate-y-20 opacity-0 transition-all duration-500 z-[100] bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 md:px-6 py-3 md:py-4 rounded-full shadow-2xl flex items-center gap-2 md:gap-3 font-semibold text-xs md:text-sm pointer-events-none w-max max-w-[90vw]">
+        <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-success/20 flex items-center justify-center text-success shrink-0"><i data-lucide="check" class="w-3 h-3 md:w-4 md:h-4"></i></div>
+        <span id="toastMsg" class="truncate">Sistem Diperbarui</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC BULLETPROOF -->
+    <script>
+        const baseNurses = [
+            { name: "Siti Mokodongan, A.Md.Kep", schedule: ["P","P","L","L","P","P","P","L","L","P","S","M","L","P","S","M","L","P","L","M","L","L","P","S","M","L","P","P","P","L"] },
+            { name: "Aviva Nelwan, A.Md.Kep", schedule: ["S","M","L","L","P","S","M","L","L","P","P","P","L","P","P","P","L","S","P","M","L","L","P","S","M","L","L","P","P","L"] },
+            { name: "Britney Wowor", schedule: ["S","M","L","L","P","S","M","L","L","P","S","M","L","P","S","M","L","L","P","P","L","L","P","P","L","P","P","L","P","P"] },
+            { name: "Axel Tumelap, A.Md.Kep", schedule: ["P","L","L","P","P","P","L","P","S","M","L","L","M","S","L","L","P","M","S","L","L","P","S","M","L","P","P","L","P","P"] },
+            { name: "Glenny Maki, A.Md.Kep", schedule: ["M","M","L","L","L","L","P","P","S","S","M","M","L","L","L","P","P","P","S","P","M","L","L","L","L","P","P","S","M","L"] },
+            { name: "Julieta Wetik, A.Md.Kep", schedule: ["M","M","L","L","P","P","S","S","M","M","L","L","L","P","P","S","M","L","L","L","L","P","P","S","P","M","L","L","L","P"] },
+            { name: "Irene Kindangen, S.kep, Ns", schedule: ["L","L","L","L","P","P","P","S","P","M","L","L","P","P","P","S","P","M","L","L","L","L","S","P","L","P","L","M","L","P"] },
+            { name: "Johnson Munaiseche, Amd.Kep", schedule: ["L","L","L","L","P","P","M","L","S","L","P","P","L","L","P","P","S","S","M","M","L","L","P","P","L","S","S","M","M","L"] },
+            { name: "Ireine Gilberheitmin, A.Md.Kep", schedule: ["L","L","P","S","M","L","P","S","M","L","L","P","S","L","M","L","P","M","S","L","P","P","P","L","P","L","P","P","L","L"] },
+            { name: "Fio Bahihi, A.Md.Kep", schedule: ["P","P","P","S","P","M","L","L","L","L","P","P","S","P","M","P","L","P","L","P","S","P","M","P","L","L","L","L","P","P"] },
+            { name: "Elvira Subroto, A.Md.Kep", schedule: ["P","S","P","M","L","L","P","P","P","M","L","L","L","L","P","P","S","P","M","P","L","L","L","L","P","P","M","S","S","M"] },
+            { name: "Irene Rondonuwu, Amd.Kep", schedule: ["P","S","M","L","L","P","M","L","L","P","S","M","L","P","S","M","L","L","P","P","L","L","P","P","P","L","L","P","P","P"] },
+            { name: "Mariam Malingkas, Amd.Kep", schedule: ["L","P","P","P","L","L","P","P","P","L","L","P","M","S","L","L","P","S","L","M","P","S","M","L","L","P","M","L","L","P"] },
+            { name: "Afrini Watak, S.Kep.Ns", schedule: ["L","P","S","M","L","L","S","M","L","L","P","P","L","L","P","S","L","L","P","P","S","M","L","L","P","M","L","P","P","L"] },
+            { name: "Jeril Katulung, A.Md.Kep", schedule: ["L","P","S","M","L","L","S","M","L","L","P","M","S","L","L","P","S","L","M","P","P","P","L","L","P","P","P","L","P","S"] },
+            { name: "Tirsa Pondaag. S.kep, Ns", schedule: ["P","P","P","P","P","L","P","P","P","P","P","L","P","P","P","P","P","L","P","P","P","P","P","L","P","P","P","P","P","L"] }
+        ];
+
+        const defaultSettings = {
+            kapusName: "Dr. Kepala Puskesmas", kaperName: "Ns. Kepala Keperawatan, S.Kep", karuName: "Dr. Winda M.",
+            timePagi: "07:00 - 14:00", timeSore: "14:00 - 21:00", timeMalam: "21:00 - 07:00"
+        };
+
+        let nurses = []; let actionsLog = []; let settingsApp = {}; let barChartInstance;
+        let isAppReady = false; // Pelindung Loading
+
+        // --- FIREBASE CLOUD DATABASE INITIALIZATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDAs_2GIu_BT6W7DrUonMwUvdw7Guq1jDs",
+            authDomain: "dduoapps.firebaseapp.com",
+            databaseURL: "https://dduoapps-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "dduoapps",
+            storageBucket: "dduoapps.firebasestorage.app",
+            messagingSenderId: "911778666047",
+            appId: "1:911778666047:web:1652b02ab2090e7f1d8a8a"
+        };
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function loadState() {
+            const indicator = document.getElementById('autoSaveIndicator');
+            
+            // 1. RENDER INSTAN DARI LOCAL STORAGE (Agar layar langsung muncul dan bisa digunakan)
+            const savedLocal = localStorage.getItem('dutyFlowFallbackDB');
+            if (savedLocal) {
+                try {
+                    const parsed = JSON.parse(savedLocal);
+                    nurses = parsed.nurses || JSON.parse(JSON.stringify(baseNurses));
+                    actionsLog = parsed.actionsLog || [];
+                    settingsApp = parsed.settingsApp || JSON.parse(JSON.stringify(defaultSettings));
+                    applySettingsToDOM();
+                    syncData();
+                } catch(e) { console.warn("Local storage parse error", e); }
+            }
+
+            // 2. TIMER FALLBACK 15 DETIK (Hanya untuk indikator UI, TIDAK menghentikan sinkronisasi Firebase)
+            const fallbackTimer = setTimeout(() => {
+                if (!isAppReady) {
+                    console.warn("⚠️ Koneksi lambat. Menunggu respons Firebase...");
+                    if (indicator) {
+                        indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-warning inline-block animate-pulse"></span> Offline Mode (Mencoba terhubung...)';
+                        indicator.className = "text-[10px] font-bold text-warning flex items-center gap-1";
+                    }
+                }
+            }, 15000);
+
+            try {
+                // 3. LISTENER FIREBASE TETAP AKTIF TANPA BATAS WAKTU (Source of Truth)
+                db.ref('dutyFlowData').on('value', (snapshot) => {
+                    clearTimeout(fallbackTimer);
+                    isAppReady = true;
+                    const data = snapshot.val();
+                    
+                    if (data) {
+                        nurses = data.nurses ? data.nurses : JSON.parse(JSON.stringify(baseNurses));
+                        actionsLog = data.actionsLog ? data.actionsLog : [];
+                        settingsApp = data.settingsApp ? data.settingsApp : JSON.parse(JSON.stringify(defaultSettings));
+                        
+                        // 4. TIMPA LOCAL STORAGE DENGAN DATA TERBARU DARI CLOUD
+                        localStorage.setItem('dutyFlowFallbackDB', JSON.stringify({ nurses, actionsLog, settingsApp }));
+
+                        applySettingsToDOM();
+                        syncData(); // Render ulang Layar
+                        
+                        if (indicator) {
+                            indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-success inline-block"></span> Cloud Synced (Online)';
+                            indicator.className = "text-[10px] font-bold text-success flex items-center gap-1";
+                        }
+                    } else {
+                        // KONDISI INI JIKA DATABASE FIREBASE KOSONG (BARU PERTAMA KALI)
+                        initDefaults(false); 
+                    }
+                }, (error) => {
+                    console.error("Firebase Error:", error);
+                    if (indicator) {
+                        indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-danger inline-block"></span> Error Koneksi Cloud';
+                        indicator.className = "text-[10px] font-bold text-danger flex items-center gap-1";
+                    }
+                });
+            } catch(e) {
+                console.error("System Fail:", e);
+            }
+        }
+
+        function initDefaults(isOffline = false) {
+            isAppReady = true;
+            
+            // Ambil dari Cache Lokal jika ada, atau Base Array jika tidak ada
+            const savedLocal = localStorage.getItem('dutyFlowFallbackDB');
+            if (savedLocal && isOffline) {
+                try {
+                    const parsed = JSON.parse(savedLocal);
+                    nurses = parsed.nurses || JSON.parse(JSON.stringify(baseNurses));
+                    actionsLog = parsed.actionsLog || [];
+                    settingsApp = parsed.settingsApp || JSON.parse(JSON.stringify(defaultSettings));
+                } catch(e) { /* ignore */ }
+            } else {
+                nurses = JSON.parse(JSON.stringify(baseNurses));
+                actionsLog = [];
+                settingsApp = JSON.parse(JSON.stringify(defaultSettings));
+            }
+
+            // KUNCI PENTING: Wajib render UI meskipun Offline!
+            applySettingsToDOM();
+            syncData();
+
+            if (!isOffline) {
+                saveState(); // Coba dorong ke Firebase jika diizinkan
+            } else {
+                const ind = document.getElementById('autoSaveIndicator');
+                if (ind) {
+                    ind.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-danger inline-block animate-pulse"></span> Offline Mode';
+                    ind.className = "text-[10px] font-bold text-danger flex items-center gap-1";
+                }
+            }
+        }
+
+        function saveState() {
+            // Backup ke Cache Lokal (Sebagai jaring pengaman)
+            localStorage.setItem('dutyFlowFallbackDB', JSON.stringify({ nurses, actionsLog, settingsApp }));
+            
+            // Dorong ke Firebase Cloud
+            try {
+                db.ref('dutyFlowData').set({ nurses: nurses, actionsLog: actionsLog, settingsApp: settingsApp });
+            } catch(err) {
+                console.error("Cloud Save Error:", err);
+            }
+        }
+
+        // --- INIT & LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDateText').innerHTML = `<i data-lucide="calendar" class="w-3.5 h-3.5 hidden sm:block"></i> <span class="truncate">${new Date().toLocaleDateString('id-ID', options)}</span>`;
+            
+            // START FIREBASE ENGINE
+            loadState();
+            
+            const actionForm = document.getElementById('actionForm');
+            if(actionForm) actionForm.addEventListener('submit', handleActionSubmit);
+            
+            document.getElementById('searchNurse').addEventListener('input', (e) => renderNurseCards(e.target.value.toLowerCase()));
+            document.getElementById('actionNurse').addEventListener('change', previewShift);
+            document.getElementById('actionDate').addEventListener('change', previewShift);
+            
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                setTimeout(() => { if(barChartInstance) barChartInstance.update(); }, 50);
+            });
+            
+            window.addEventListener('click', function(e){
+                const notifD = document.getElementById('notifDropdown');
+                if (notifD && !notifD.contains(e.target) && !e.target.closest('button[onclick="toggleNotifDropdown()"]')){
+                    notifD.classList.add('hidden');
+                }
+            });
+
+            switchView('dashboard');
+        });
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if(sidebar) sidebar.classList.toggle('-translate-x-full');
+            if(overlay) overlay.classList.toggle('hidden');
+        }
+
+        function syncData() {
+            try {
+                populateSelects();
+                renderMatrixCalendar();
+                renderNurseCards();
+                renderActionSummary();
+                renderAnalyticsLog();
+                renderWeeklyExchangeTimeline();
+                updateKPIs();
+                updateNotifications();
+                renderSettingsNurses();
+                
+                if(document.getElementById('view-dashboard').classList.contains('active')){
+                    renderCharts();
+                }
+            } catch(e) { console.error("Sync Rendering Error:", e); }
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('view-' + viewId);
+            if(target) target.classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.getAttribute('onclick').includes(viewId)) {
+                    btn.classList.add('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-brand-600', 'dark:text-brand-400');
+                    btn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800/50');
+                } else {
+                    btn.classList.remove('bg-white', 'dark:bg-slate-800', 'shadow-sm', 'text-brand-600', 'dark:text-brand-400');
+                    btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800/50');
+                }
+            });
+
+            const sidebar = document.getElementById('mainSidebar');
+            if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+                toggleMobileMenu();
+            }
+
+            if(viewId === 'dashboard') {
+                setTimeout(() => { try { renderCharts(); } catch(e){} }, 100);
+            }
+        }
+
+        function renderWeeklyExchangeTimeline() {
+            try {
+                const container = document.getElementById('weeklyExchangeTimeline');
+                if(!container) return;
+
+                const swapsThisWeek = actionsLog.filter(l => l.type === 'Tukar Dinas' && l.date >= 1 && l.date <= 7);
+
+                if(swapsThisWeek.length === 0) {
+                    container.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-slate-400 py-8 opacity-70">
+                        <i data-lucide="check-circle" class="w-8 h-8 mb-2 text-success"></i>
+                        <p class="text-xs text-center font-medium">Tidak ada pertukaran dinas aktif minggu ini.</p>
+                    </div>`;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = swapsThisWeek.map(sw => {
+                    const isDone = sw.status === 'Sudah Ditebus';
+                    const isMasuk = sw.status === 'Sudah Masuk' || isDone;
+                    
+                    const dotColor = isDone ? 'bg-success' : (isMasuk ? 'bg-brand-500' : 'bg-warning animate-pulse');
+                    const badgeStyle = isDone ? 'bg-success/10 text-success' : (isMasuk ? 'bg-brand-50 text-brand-600' : 'bg-warning/10 text-warning');
+                    const badgeTxt = isDone ? 'Lunas' : (isMasuk ? 'Sudah Masuk' : 'Belum Masuk');
+
+                    return `
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-3 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 shadow-sm border border-white dark:border-slate-800"></div>
+                            <div class="truncate max-w-[150px] sm:max-w-[200px]">
+                                <p class="text-[11px] font-bold text-slate-700 dark:text-slate-200 truncate">${sw.nurse1} ↔ ${sw.nurse2}</p>
+                                <p class="text-[10px] text-slate-500 mt-0.5"><i data-lucide="calendar" class="w-3 h-3 inline"></i> Tgl: ${sw.date} Jun</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${badgeStyle} shrink-0">${badgeTxt}</span>
+                    </div>`;
+                }).join('');
+                lucide.createIcons();
+            } catch(e) { console.warn(e); }
+        }
+
+        function getShiftSaaSData(shift) {
+            if (shift === 'P') return { cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', icon: '☀️' };
+            if (shift === 'S') return { cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', icon: '🌤️' };
+            if (shift === 'M') return { cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400', icon: '🌙' };
+            return { cls: 'bg-slate-100 text-slate-500 dark:bg-slate-800/50 dark:text-slate-500', icon: '🏖️' };
+        }
+
+        function cycleShift(nurseName, dayIndex) {
+            const shiftCycle = {'P':'S', 'S':'M', 'M':'L', 'L':'P'};
+            let nIdx = nurses.findIndex(n => n.name === nurseName);
+            if(nIdx !== -1) {
+                let current = nurses[nIdx].schedule[dayIndex];
+                nurses[nIdx].schedule[dayIndex] = shiftCycle[current];
+                saveState();
+                syncData(); // Live Re-render
+                showToast(`Shift diubah manual: ${current} ➔ ${shiftCycle[current]}`);
+            }
+        }
+
+        function resetToMasterSchedule() {
+            if(confirm("Yakin mereset seluruh jadwal dan histori aksi kembali ke default awal bulan?")) {
+                nurses = JSON.parse(JSON.stringify(baseNurses));
+                actionsLog = [];
+                saveState();
+                syncData();
+                showToast("Jadwal dikembalikan ke Master!");
+            }
+        }
+
+        function renderMatrixCalendar() {
+            const tbody = document.getElementById('matrixTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            nurses.forEach((nurse) => {
+                const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nurse.name)}&background=random&color=fff&rounded=true`;
+                let row = `<tr class="hover:bg-white dark:hover:bg-slate-800/80 transition-colors group">
+                    <td class="p-2 md:p-3 sticky-col bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-r border-slate-200 dark:border-slate-700 z-20">
+                        <div class="flex items-center gap-2 md:gap-3">
+                            <img src="${avatar}" class="w-6 h-6 md:w-8 md:h-8 rounded-full border border-slate-200 dark:border-slate-700">
+                            <span class="font-semibold text-[11px] md:text-[13px] whitespace-nowrap">${nurse.name}</span>
+                        </div>
+                    </td>`;
+                
+                let totalHariKerja = 0;
+
+                nurse.schedule.forEach((shift, index) => {
+                    const dateNum = index + 1;
+                    const sd = getShiftSaaSData(shift);
+                    if (shift === 'P' || shift === 'S' || shift === 'M') totalHariKerja++;
+                    
+                    let indicator = '';
+                    const swap = actionsLog.find(log => log.type === 'Tukar Dinas' && log.date === dateNum && (log.nurse1 === nurse.name || log.nurse2 === nurse.name));
+                    if (swap) {
+                        const isDone = swap.status === 'Sudah Ditebus';
+                        const isMasuk = swap.status === 'Sudah Masuk' || isDone;
+                        const col = isDone ? 'bg-success' : (isMasuk ? 'bg-brand-500' : 'bg-warning animate-pulse');
+                        indicator = `<span class="absolute -top-1 -right-1 w-2 h-2 md:w-2.5 md:h-2.5 rounded-full border-2 border-white dark:border-slate-900 shadow-sm ${col}"></span>`;
+                    }
+
+                    row += `<td class="p-0.5 md:p-1 border-b border-slate-200 dark:border-slate-700">
+                                <div onclick="cycleShift('${nurse.name}', ${index})" class="w-full h-8 md:h-10 relative flex items-center justify-center rounded-md md:rounded-lg text-[10px] md:text-xs font-bold shadow-sm cursor-pointer hover:ring-2 hover:ring-brand-500 transition-all ${sd.cls}" title="Klik untuk edit shift">
+                                    <span class="hidden md:inline">${sd.icon}</span> <span class="ml-0 md:ml-0.5">${shift}</span>
+                                    ${indicator}
+                                </div>
+                            </td>`;
+                });
+                
+                const totalMenit = totalHariKerja * 495;
+                const totalJam = Math.floor(totalMenit / 60);
+                const sisaMenit = totalMenit % 60;
+                
+                row += `<td class="p-1 md:p-2 border-b border-slate-200 dark:border-slate-700 text-center font-bold text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-900/50">${totalHariKerja}</td>`;
+                row += `<td class="p-1 md:p-2 border-b border-slate-200 dark:border-slate-700 text-center text-[9px] md:text-[11px] font-bold text-brand-600 dark:text-brand-400 bg-brand-50/50 dark:bg-brand-900/10">${totalJam}j ${sisaMenit}m</td>`;
+                row += '</tr>';
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        function populateSelects() {
+            const select1 = document.getElementById('actionNurse');
+            const select2 = document.getElementById('actionSwapWith');
+            if(!select1 || !select2) return;
+            const val1 = select1.value; const val2 = select2.value;
+            
+            select1.innerHTML = '<option value="">Pilih Pegawai...</option>';
+            select2.innerHTML = '<option value="">Pilih Pengganti...</option>';
+            nurses.forEach(n => {
+                select1.insertAdjacentHTML('beforeend', `<option value="${n.name}">${n.name}</option>`);
+                select2.insertAdjacentHTML('beforeend', `<option value="${n.name}">${n.name}</option>`);
+            });
+            select1.value = val1; select2.value = val2;
+        }
+
+        function updateNotifications() {
+            const today = new Date().getDate(); 
+            const alerts = actionsLog.filter(l => l.type === 'Tukar Dinas' && l.status !== 'Sudah Ditebus' && l.repayDate !== null && l.repayDate <= today);
+            
+            const badgeH = document.getElementById('headerNotifBadge');
+            const count = document.getElementById('notifCount');
+            const list = document.getElementById('notifList');
+            
+            if(!badgeH || !count || !list) return;
+
+            if(alerts.length > 0) {
+                badgeH.classList.remove('hidden');
+                count.innerText = alerts.length;
+                list.innerHTML = alerts.map(a => `
+                    <div class="p-3 md:p-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer" onclick="openHistoryModal('${a.nurse1}'); document.getElementById('notifDropdown').classList.add('hidden');">
+                        <p class="text-[11px] md:text-xs font-bold text-danger mb-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> Penebusan Jatuh Tempo</p>
+                        <p class="text-[10px] md:text-[11px] text-slate-600 dark:text-slate-300"><b>${a.nurse1}</b> wajib menebus kepada <b>${a.nurse2}</b> (Tgl ${a.repayDate})</p>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            } else {
+                badgeH.classList.add('hidden');
+                count.innerText = "0";
+                list.innerHTML = '<div class="p-4 md:p-6 text-center text-slate-400 text-[10px] md:text-xs">Semua aman terkendali.</div>';
+            }
+        }
+
+        function toggleSwapFields() {
+            const type = document.getElementById('actionType').value;
+            const swapFields = document.getElementById('swapFields');
+            const actionSwapWith = document.getElementById('actionSwapWith');
+            if (type === 'Tukar Dinas') {
+                swapFields.classList.remove('hidden');
+                swapFields.classList.add('animate-fade-in');
+                actionSwapWith.setAttribute('required', 'true');
+            } else {
+                swapFields.classList.add('hidden');
+                actionSwapWith.removeAttribute('required');
+            }
+            previewShift();
+        }
+
+        function previewShift() {
+            const nurseName = document.getElementById('actionNurse').value;
+            const dateStr = document.getElementById('actionDate').value;
+            const previewBox = document.getElementById('previewOriginalShift');
+            const type = document.getElementById('actionType').value;
+            
+            if (!nurseName || !dateStr || dateStr < 1 || dateStr > 30) {
+                previewBox.classList.add('hidden'); return;
+            }
+
+            const dayIndex = parseInt(dateStr) - 1;
+            const nurse1 = nurses.find(n => n.name === nurseName);
+            const sd1 = getShiftSaaSData(nurse1.schedule[dayIndex]);
+            
+            let text = `<div class="flex items-center justify-between"><span class="font-semibold">Shift Asli ${nurse1.name}:</span> <span class="px-2 py-1 rounded font-bold ${sd1.cls}">${sd1.icon} ${nurse1.schedule[dayIndex]}</span></div>`;
+
+            if(type === 'Tukar Dinas') {
+                const swapName = document.getElementById('actionSwapWith').value;
+                if(swapName) {
+                    const nurse2 = nurses.find(n => n.name === swapName);
+                    const sd2 = getShiftSaaSData(nurse2.schedule[dayIndex]);
+                    text += `<div class="w-full h-px bg-slate-200 dark:bg-slate-700 my-2"></div><div class="flex items-center justify-between"><span class="font-semibold">Shift Asli ${nurse2.name}:</span> <span class="px-2 py-1 rounded font-bold ${sd2.cls}">${sd2.icon} ${nurse2.schedule[dayIndex]}</span></div>`;
+                }
+            }
+            previewBox.innerHTML = text;
+            previewBox.classList.remove('hidden');
+        }
+
+        function handleActionSubmit(e) {
+            e.preventDefault();
+            try {
+                const nurse1Name = document.getElementById('actionNurse').value;
+                const dateVal = document.getElementById('actionDate').value;
+                const date = parseInt(dateVal);
+                const type = document.getElementById('actionType').value;
+                const notes = document.getElementById('actionNotes').value || '-';
+                
+                if (!nurse1Name || isNaN(date) || date < 1 || date > 30 || !type) {
+                    showToast("⚠️ Harap lengkapi form!"); return;
+                }
+
+                const nurse1Index = nurses.findIndex(n => n.name === nurse1Name);
+                if(nurse1Index === -1) throw new Error("Pegawai tidak ditemukan.");
+                
+                const dayIndex = date - 1;
+                
+                let logEntry = {
+                    id: Date.now(), date: date, nurse1: nurse1Name, type: type, notes: notes,
+                    originalShift1: nurses[nurse1Index].schedule[dayIndex],
+                    nurse2: null, originalShift2: null, status: null, repayDate: null
+                };
+
+                if (type === 'Tukar Dinas') {
+                    const nurse2Name = document.getElementById('actionSwapWith').value;
+                    if (!nurse2Name) throw new Error("Pilih perawat pengganti!");
+                    if (nurse1Name === nurse2Name) throw new Error("Tidak bisa bertukar dengan diri sendiri!");
+
+                    const status = document.getElementById('actionStatus').value;
+                    const repayDateVal = document.getElementById('actionRepayDate').value;
+                    const nurse2Index = nurses.findIndex(n => n.name === nurse2Name);
+                    
+                    logEntry.nurse2 = nurse2Name;
+                    logEntry.originalShift2 = nurses[nurse2Index].schedule[dayIndex];
+                    logEntry.status = status;
+                    logEntry.repayDate = repayDateVal ? parseInt(repayDateVal) : null;
+                    
+                    let temp = nurses[nurse1Index].schedule[dayIndex];
+                    nurses[nurse1Index].schedule[dayIndex] = nurses[nurse2Index].schedule[dayIndex];
+                    nurses[nurse2Index].schedule[dayIndex] = temp;
+                } else {
+                    nurses[nurse1Index].schedule[dayIndex] = 'L'; 
+                }
+
+                actionsLog.push(logEntry);
+                saveState(); // push to Cloud
+                
+                showToast("✅ Transaksi Tersimpan ke Cloud!");
+                document.getElementById('actionForm').reset();
+                document.getElementById('previewOriginalShift').classList.add('hidden');
+                toggleSwapFields();
+
+                // Live Update
+                syncData();
+
+                // Animasi Sorotan
+                const tableArea = document.getElementById('integritasTableWrapper');
+                if(tableArea) {
+                    tableArea.classList.add('ring-4', 'ring-brand-500/50', 'transition-all', 'duration-300');
+                    setTimeout(() => { tableArea.classList.remove('ring-4', 'ring-brand-500/50'); }, 800);
+                }
+            } catch (err) {
+                console.error("Form Submit Error: ", err);
+                showToast("❌ Gagal menyimpan: " + err.message);
+            }
+        }
+
+        function renderActionSummary() {
+            const tbody = document.getElementById('actionSummaryTable');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            nurses.forEach(nurse => {
+                let tT = 0, tS = 0, tI = 0, tA = 0;
+                let hasPending  = false;
+                let allSwaps    = [];
+
+                actionsLog.forEach(log => {
+                    if (log.nurse1 === nurse.name || log.nurse2 === nurse.name) {
+                        if (log.type === 'Tukar Dinas') {
+                            tT++;
+                            if (log.status !== 'Sudah Ditebus') hasPending = true;
+                            allSwaps.push(log);
+                        }
+                    }
+                    if (log.nurse1 === nurse.name) {
+                        if (log.type === 'Sakit') tS++;
+                        if (log.type === 'Izin')  tI++;
+                        if (log.type === 'Alpa')  tA++;
+                    }
+                });
+
+                const alertDot = hasPending ? `<span class="absolute top-1/2 -translate-y-1/2 -left-1 md:-left-2 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-warning animate-pulse"></span>` : '';
+                let swapDesc = `<span class="text-[9px] md:text-[10px] text-slate-400 italic">Tidak ada catatan</span>`;
+
+                if (allSwaps.length > 0) {
+                    const sorted = [...allSwaps].sort((a, b) => b.id - a.id);
+                    const rows = sorted.map((sw, idx) => {
+                        const isDone = sw.status === 'Sudah Ditebus';
+                        const isMasuk = sw.status === 'Sudah Masuk' || isDone;
+                        const isNurse1 = sw.nurse1 === nurse.name; // nurse1 is pemohon
+                        
+                        let contentStr = '';
+                        const noteHtml = sw.notes && sw.notes !== '-' ? `<div class="text-[10px] text-slate-400 italic mt-1 pl-2 border-l-2 border-slate-300 dark:border-slate-600">${sw.notes}</div>` : '';
+
+                        if (!isNurse1) { 
+                            // Pengganti (Harus Masuk)
+                            const selectColor = isMasuk ? 'text-brand-600 border-brand-300' : 'text-warning border-warning/30';
+                            contentStr = `
+                                <div class="text-[11px] text-slate-600 dark:text-slate-300 mb-1 leading-tight">
+                                    Menggantikan dinas <b>${sw.nurse1}</b> tanggal ${sw.date} Juni
+                                </div>
+                                <select onchange="event.stopPropagation(); updateRepayStatus(${sw.id}, this.value)"
+                                        class="text-[10px] font-bold px-2 py-1 rounded-md border outline-none cursor-pointer bg-white dark:bg-slate-900 ${selectColor}">
+                                    <option value="Belum Masuk" ${sw.status === 'Belum Masuk' ? 'selected' : ''}>⏳ Belum Masuk</option>
+                                    <option value="Sudah Masuk" ${isMasuk ? 'selected' : ''}>🏃 Sudah Masuk</option>
+                                </select>
+                                ${noteHtml}
+                            `;
+                        } else { 
+                            // Pemohon (Harus Bayar/Tebus)
+                            const selectColor = isDone ? 'text-success border-success/30' : 'text-danger border-danger/30';
+                            const repayStr = sw.repayDate ? `${sw.repayDate} Jun` : 'Belum ditentukan';
+                            contentStr = `
+                                <div class="text-[11px] text-slate-600 dark:text-slate-300 mb-1 leading-tight">
+                                    Tebus dinas <b>${sw.nurse2}</b> (Tgl tebus: ${repayStr})
+                                </div>
+                                <select onchange="event.stopPropagation(); updateRepayStatus(${sw.id}, this.value)"
+                                        class="text-[10px] font-bold px-2 py-1 rounded-md border outline-none cursor-pointer bg-white dark:bg-slate-900 ${selectColor}">
+                                    <option value="Belum Ditebus" ${!isDone ? 'selected' : ''}>⏳ Belum Ditebus</option>
+                                    <option value="Sudah Ditebus" ${isDone ? 'selected' : ''}>✅ Sudah Ditebus</option>
+                                </select>
+                                ${noteHtml}
+                            `;
+                        }
+
+                        const border = idx < sorted.length - 1 ? 'border-b border-dashed border-slate-200 dark:border-slate-700 pb-2 mb-2' : '';
+                        return `<div class="flex flex-col items-start ${border}">${contentStr}</div>`;
+                    }).join('');
+                    swapDesc = `<div class="flex flex-col py-1 gap-2">${rows}</div>`;
+                }
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer group align-top" onclick="openHistoryModal('${nurse.name}')">
+                        <td class="py-3 md:py-4 px-2 md:px-4 relative">${alertDot}<div class="font-semibold text-xs md:text-sm">${nurse.name}</div></td>
+                        <td class="py-3 md:py-4 text-center"><span class="inline-flex w-6 h-6 md:w-8 md:h-8 rounded-lg ${tT > 0 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} items-center justify-center font-bold text-xs md:text-sm">${tT}</span></td>
+                        <td class="py-3 md:py-4 text-center"><span class="inline-flex w-6 h-6 md:w-8 md:h-8 rounded-lg ${tS > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} items-center justify-center font-bold text-xs md:text-sm">${tS}</span></td>
+                        <td class="py-3 md:py-4 text-center"><span class="inline-flex w-6 h-6 md:w-8 md:h-8 rounded-lg ${tI > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} items-center justify-center font-bold text-xs md:text-sm">${tI}</span></td>
+                        <td class="py-3 md:py-4 text-center"><span class="inline-flex w-6 h-6 md:w-8 md:h-8 rounded-lg ${tA > 0 ? 'bg-red-100 text-red-700' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'} items-center justify-center font-bold text-xs md:text-sm">${tA}</span></td>
+                        <td class="py-3 md:py-4 px-2 md:px-3">${swapDesc}</td>
+                        <td class="py-3 md:py-4 px-2 md:px-4 text-right no-print"><i data-lucide="chevron-right" class="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-brand-500 transition-colors"></i></td>
+                    </tr>
+                `);
+            });
+
+            lucide.createIcons();
+            const pendings = actionsLog.some(l => l.type === 'Tukar Dinas' && l.status !== 'Sudah Ditebus');
+            const badge = document.getElementById('pendingSwapBadge');
+            if(badge) badge.classList.toggle('hidden', !pendings);
+        }
+
+        function openHistoryModal(nurseName) {
+            document.getElementById('modalHistoryTitle').innerText = nurseName;
+            const tbody = document.getElementById('modalHistoryBody');
+            const emptyMsg = document.getElementById('modalHistoryEmpty');
+            tbody.innerHTML = '';
+            
+            const myLogs = actionsLog.filter(l => l.nurse1 === nurseName || l.nurse2 === nurseName).reverse();
+            
+            if(myLogs.length === 0) {
+                emptyMsg.classList.remove('hidden'); emptyMsg.classList.add('flex');
+            } else {
+                emptyMsg.classList.add('hidden'); emptyMsg.classList.remove('flex');
+                
+                myLogs.forEach(log => {
+                    let isSwap = log.type === 'Tukar Dinas';
+                    let desc = log.type;
+                    let icon = isSwap ? 'arrow-left-right' : 'alert-circle';
+                    let colorCls = isSwap ? 'text-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'text-warning bg-warning/10';
+                    
+                    let interactHtml = `<p class="text-[10px] md:text-xs text-slate-500 mt-1">${log.notes}</p>`;
+
+                    if(isSwap) {
+                        const isNurse1 = log.nurse1 === nurseName;
+                        const partner = isNurse1 ? log.nurse2 : log.nurse1;
+                        desc = `Tukar dgn ${partner}`;
+
+                        const isDone = log.status === 'Sudah Ditebus';
+                        const isMasuk = log.status === 'Sudah Masuk' || isDone;
+                        
+                        let selectHtml = '';
+                        if (!isNurse1) {
+                            const selectColor = isMasuk ? 'text-brand-600 bg-brand-50 border-brand-300' : 'text-warning bg-warning/10 border-warning/30';
+                            selectHtml = `
+                                <select onchange="updateRepayStatus(${log.id}, this.value)" class="text-[10px] md:text-xs px-2 md:px-2.5 py-1 rounded-md border ${selectColor} font-bold outline-none cursor-pointer">
+                                    <option value="Belum Masuk" ${log.status === 'Belum Masuk' ? 'selected' : ''}>⏳ Belum Masuk</option>
+                                    <option value="Sudah Masuk" ${isMasuk ? 'selected' : ''}>🏃 Sudah Masuk</option>
+                                </select>`;
+                        } else {
+                            const selectColor = isDone ? 'text-success bg-success/10 border-success/30' : 'text-danger bg-danger/10 border-danger/30';
+                            selectHtml = `
+                                <select onchange="updateRepayStatus(${log.id}, this.value)" class="text-[10px] md:text-xs px-2 md:px-2.5 py-1 rounded-md border ${selectColor} font-bold outline-none cursor-pointer">
+                                    <option value="Belum Ditebus" ${!isDone ? 'selected' : ''}>⏳ Belum Ditebus</option>
+                                    <option value="Sudah Ditebus" ${isDone ? 'selected' : ''}>✅ Sudah Ditebus</option>
+                                </select>`;
+                        }
+                        
+                        interactHtml = `
+                            <p class="text-[10px] md:text-xs text-slate-500 mt-1 mb-2">${log.notes}</p>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-[9px] md:text-[10px] font-bold uppercase text-slate-400">Status:</span>
+                                ${selectHtml}
+                            </div>
+                        `;
+                    }
+                    
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <div class="p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex gap-3 md:gap-4">
+                            <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl ${colorCls} flex items-center justify-center shrink-0"><i data-lucide="${icon}" class="w-4 h-4 md:w-5 md:h-5"></i></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-display font-semibold text-xs md:text-sm">${desc}</h4>
+                                        <p class="text-[9px] md:text-[10px] font-bold text-brand-500 mt-0.5"><i data-lucide="calendar" class="w-2.5 h-2.5 md:w-3 md:h-3 inline"></i> Tgl ${log.date} Jun</p>
+                                    </div>
+                                    <div class="flex gap-1">
+                                        <button onclick="editAction(${log.id})" class="text-slate-400 hover:text-brand-500 hover:bg-brand-50 p-1 md:p-1.5 rounded-lg transition-colors"><i data-lucide="edit" class="w-3 h-3 md:w-4 md:h-4"></i></button>
+                                        <button onclick="deleteAction(${log.id})" class="text-slate-400 hover:text-danger hover:bg-danger/10 p-1 md:p-1.5 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-3 h-3 md:w-4 md:h-4"></i></button>
+                                    </div>
+                                </div>
+                                ${interactHtml}
+                            </div>
+                        </div>
+                    `);
+                });
+                lucide.createIcons();
+            }
+            document.getElementById('modalHistory').classList.remove('hidden');
+        }
+
+        function updateRepayStatus(actionId, newStatus) {
+            const log = actionsLog.find(l => l.id === actionId);
+            if (log) {
+                log.status = newStatus;
+                saveState(); // push to Cloud
+                syncData(); // Live reload table
+                showToast(`Status disinkron ke Cloud: ${newStatus}`);
+            }
+        }
+
+        function editAction(actionId) {
+            const log = actionsLog.find(l => l.id === actionId);
+            if(!log) return;
+            
+            // Masukkan data ke Form
+            document.getElementById('actionNurse').value = log.nurse1;
+            document.getElementById('actionDate').value = log.date;
+            document.getElementById('actionType').value = log.type;
+            
+            toggleSwapFields();
+            
+            if(log.type === 'Tukar Dinas') {
+                document.getElementById('actionSwapWith').value = log.nurse2;
+                document.getElementById('actionRepayDate').value = log.repayDate || '';
+                document.getElementById('actionStatus').value = log.status || 'Belum Masuk';
+            }
+            
+            document.getElementById('actionNotes').value = log.notes;
+            previewShift();
+            
+            // Hapus log lama secara diam-diam (agar tidak bentrok saat disimpan ulang)
+            deleteAction(actionId, true);
+            
+            // Tutup modal dan arahkan pandangan user ke form
+            closeHistoryModal();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast("⚠️ Mode Edit: Silakan perbaiki dan Simpan kembali!");
+        }
+
+        function closeHistoryModal() { document.getElementById('modalHistory').classList.add('hidden'); }
+
+        function deleteAction(actionId, isSilent = false) {
+            const index = actionsLog.findIndex(l => l.id === actionId);
+            if(index === -1) return;
+            const log = actionsLog[index];
+            const dayIndex = log.date - 1;
+            
+            // Revert Shift back to original
+            const n1Idx = nurses.findIndex(n => n.name === log.nurse1);
+            if(n1Idx > -1) nurses[n1Idx].schedule[dayIndex] = log.originalShift1;
+            
+            if(log.type === 'Tukar Dinas' && log.nurse2) {
+                const n2Idx = nurses.findIndex(n => n.name === log.nurse2);
+                if(n2Idx > -1) nurses[n2Idx].schedule[dayIndex] = log.originalShift2;
+            }
+
+            actionsLog.splice(index, 1);
+            saveState(); // push to Cloud
+            
+            if(!isSilent) {
+                showToast("Aksi Dihapus & Sinkron");
+                closeHistoryModal();
+                syncData(); // Update screen
+            }
+        }
+
+        // --- SISTEM PENGATURAN & CETAK PDF ---
+        function applySettingsToDOM() {
+            const headDisplay = settingsApp.karuName || "Admin";
+            if(document.getElementById('headerHeadName')) document.getElementById('headerHeadName').innerText = headDisplay;
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(headDisplay)}&background=2563EB&color=fff&rounded=true&bold=true`;
+            if(document.getElementById('headerAvatar')) document.getElementById('headerAvatar').src = avatarUrl;
+
+            if(document.getElementById('timePagiDisplay')) document.getElementById('timePagiDisplay').innerText  = `☀️ ${settingsApp.timePagi}`;
+            if(document.getElementById('timeSoreDisplay')) document.getElementById('timeSoreDisplay').innerText  = `🌤️ ${settingsApp.timeSore}`;
+            if(document.getElementById('timeMalamDisplay')) document.getElementById('timeMalamDisplay').innerText = `🌙 ${settingsApp.timeMalam}`;
+            
+            if(document.getElementById('setKapusName')) document.getElementById('setKapusName').value = settingsApp.kapusName || '';
+            if(document.getElementById('setKaperName')) document.getElementById('setKaperName').value = settingsApp.kaperName || '';
+            if(document.getElementById('setKaruName')) document.getElementById('setKaruName').value  = settingsApp.karuName || '';
+            if(document.getElementById('setJamPagi')) document.getElementById('setJamPagi').value   = settingsApp.timePagi;
+            if(document.getElementById('setJamSore')) document.getElementById('setJamSore').value   = settingsApp.timeSore;
+            if(document.getElementById('setJamMalam')) document.getElementById('setJamMalam').value  = settingsApp.timeMalam;
+        }
+
+        function saveSettings() {
+            settingsApp.kapusName = document.getElementById('setKapusName').value;
+            settingsApp.kaperName = document.getElementById('setKaperName').value;
+            settingsApp.karuName  = document.getElementById('setKaruName').value;
+            settingsApp.timePagi  = document.getElementById('setJamPagi').value;
+            settingsApp.timeSore  = document.getElementById('setJamSore').value;
+            settingsApp.timeMalam = document.getElementById('setJamMalam').value;
+            
+            saveState();
+            applySettingsToDOM();
+            showToast("Pengaturan Sistem tersimpan!");
+        }
+
+        function renderSettingsNurses() {
+            const grid = document.getElementById('settingsNursesGrid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            nurses.forEach((n, idx) => {
+                grid.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                        <input type="text" id="editNurse_${idx}" value="${n.name}" class="flex-1 px-3 py-2 text-sm bg-transparent outline-none focus:ring-1 focus:ring-brand-500 rounded">
+                        <button onclick="updateNurseName('${n.name}', document.getElementById('editNurse_${idx}').value)" class="p-2 text-brand-600 hover:bg-brand-100 dark:hover:bg-brand-900/30 rounded-lg"><i data-lucide="save" class="w-4 h-4"></i></button>
+                    </div>
+                `);
+            });
+            lucide.createIcons();
+        }
+
+        function updateNurseName(oldName, newName) {
+            if(!newName || oldName === newName) return;
+            let n = nurses.find(n => n.name === oldName);
+            if(n) n.name = newName;
+            actionsLog.forEach(log => {
+                if(log.nurse1 === oldName) log.nurse1 = newName;
+                if(log.nurse2 === oldName) log.nurse2 = newName;
+            });
+            saveState();
+            syncData();
+            showToast(`Nama ${oldName} diubah`);
+        }
+
+        function printIntegritas() {
+            const tableHTML = document.getElementById('integritasTable').outerHTML;
+            const kapusName = settingsApp.kapusName || "Dr. Kepala Puskesmas";
+            const kaperName = settingsApp.kaperName || "Ns. Kepala Keperawatan, S.Kep";
+            const karuName = settingsApp.karuName || "Ns. Kepala Ruangan, S.Kep";
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Laporan Integritas Staf - DutyFlow</title>
+                    <style>
+                        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #333; }
+                        h2 { text-align: center; margin-bottom: 5px; font-size: 24px; color: #1e293b; }
+                        p.subtitle { text-align: center; margin-bottom: 30px; color: #64748b; font-size: 14px; }
+                        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 20px; }
+                        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
+                        th { background-color: #f8fafc; font-weight: bold; text-transform: uppercase; font-size: 11px; color: #475569; }
+                        .text-center { text-align: center; }
+                        .text-right { text-align: right; }
+                        .no-print { display: none !important; }
+                        
+                        .font-semibold { font-weight: 600; }
+                        .font-bold { font-weight: bold; }
+                        .text-slate-400 { color: #94a3b8; }
+                        .text-slate-500 { color: #64748b; }
+                        .text-slate-700 { color: #334155; }
+                        .italic { font-style: italic; }
+                        .text-\\[10px\\] { font-size: 10px; }
+                        .text-\\[11px\\] { font-size: 11px; }
+                        .mt-0\\.5, .mt-1 { margin-top: 4px; }
+                        .inline-block { display: inline-block; }
+                        .mr-1, .mr-1\\.5 { margin-right: 6px; }
+                        .w-1\\.5 { width: 8px; }
+                        .h-1\\.5 { height: 8px; }
+                        .rounded-full { border-radius: 50%; }
+                        .bg-warning { background-color: #f59e0b; }
+                        .bg-success { background-color: #10b981; }
+                        .flex { display: flex; }
+                        .flex-col { flex-direction: column; }
+                        
+                        .signatures { display: flex; justify-content: space-between; margin-top: 60px; font-size: 12px; text-align: center; }
+                        .sig-block { width: 30%; }
+                        .sig-name { font-weight: bold; margin-top: 70px; text-decoration: underline; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Laporan Status Integritas & Riwayat Tukar Dinas</h2>
+                    <p class="subtitle">Bulan: Juni 2026 | Aplikasi DutyFlow</p>
+                    ${tableHTML}
+                    
+                    <div class="signatures">
+                        <div class="sig-block">Mengetahui,<br>Kepala Puskesmas<div class="sig-name">${kapusName}</div></div>
+                        <div class="sig-block"><br>Kepala Keperawatan<div class="sig-name">${kaperName}</div></div>
+                        <div class="sig-block"><br>Kepala Ruangan<div class="sig-name">${karuName}</div></div>
+                    </div>
+                    <script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        function backupData() {
+            try {
+                const payload = JSON.stringify({ nurses, actionsLog, settingsApp }, null, 2);
+                const blob = new Blob([payload], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dutyflow_backup_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a); 
+                a.click(); 
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("File Backup Diunduh!");
+            } catch (err) {
+                showToast("Gagal membuat backup.");
+            }
+        }
+
+        function restoreData(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            event.target.value = ''; // Reset memory input file
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if(imported.nurses && Array.isArray(imported.nurses)) nurses = imported.nurses;
+                    if(imported.actionsLog && Array.isArray(imported.actionsLog)) actionsLog = imported.actionsLog;
+                    if(imported.settingsApp) settingsApp = imported.settingsApp;
+                    
+                    saveState(); // push to Cloud
+                    syncData();
+                    showToast("Restore Database Cloud Berhasil!");
+                } catch(err) { 
+                    showToast("File backup corrupt!"); 
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function renderAnalyticsLog() {
+            const tbody = document.getElementById('analyticsTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let tT=0, tS=0, tI=0, tA=0;
+
+            actionsLog.slice().reverse().forEach(log => {
+                if (log.type === 'Tukar Dinas') tT++; else if (log.type === 'Sakit') tS++; else if (log.type === 'Izin') tI++; else if (log.type === 'Alpa') tA++;
+
+                let badgeCls = 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400';
+                let detailsHtml = `<span class="text-slate-500">${log.notes}</span>`;
+
+                if (log.type === 'Tukar Dinas') {
+                    badgeCls = 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+                    const isRepaid  = log.status === 'Sudah Ditebus';
+                    const isMasuk   = log.status === 'Sudah Masuk' || isRepaid;
+                    const statusCls = isRepaid ? 'bg-success/15 text-success' : (isMasuk ? 'bg-brand-50 text-brand-600' : 'bg-warning/15 text-warning');
+                    const statusTxt = isRepaid ? '✅ Lunas' : (isMasuk ? '🏃 Sudah Masuk' : '⏳ Belum Masuk');
+                    
+                    detailsHtml = `
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="font-semibold text-slate-700 dark:text-slate-200">↔ Swap dgn <span class="text-brand-600 dark:text-brand-400">${log.nurse2}</span></span>
+                                <span class="text-[9px] md:text-[10px] px-1.5 md:px-2 py-0.5 rounded font-bold ${statusCls}">${statusTxt}</span>
+                            </div>
+                            <div class="text-[10px] md:text-[11px] text-slate-500 flex flex-wrap gap-2">
+                                <span class="opacity-60">${log.notes}</span>
+                            </div>
+                        </div>`;
+                } else if (log.type === 'Sakit') { badgeCls = 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+                } else if (log.type === 'Izin') { badgeCls = 'bg-success/20 text-success';
+                } else if (log.type === 'Alpa') { badgeCls = 'bg-danger/20 text-danger'; }
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 align-top">
+                        <td class="p-3 md:p-4 text-slate-500 whitespace-nowrap">${log.date} Jun</td>
+                        <td class="p-3 md:p-4 font-semibold whitespace-nowrap">${log.nurse1}</td>
+                        <td class="p-3 md:p-4 whitespace-nowrap"><span class="px-2 md:px-3 py-1 text-[10px] md:text-xs font-bold rounded-lg ${badgeCls}">${log.type}</span></td>
+                        <td class="p-3 md:p-4 text-[10px] md:text-xs">${detailsHtml}</td>
+                    </tr>
+                `);
+            });
+
+            if(document.getElementById('statTukar')) document.getElementById('statTukar').innerText = tT;
+            if(document.getElementById('statSakit')) document.getElementById('statSakit').innerText = tS;
+            if(document.getElementById('statIjin')) document.getElementById('statIjin').innerText  = tI;
+            if(document.getElementById('statAlpa')) document.getElementById('statAlpa').innerText  = tA;
+        }
+
+        function renderNurseCards(searchQuery = '') {
+            const container = document.getElementById('nurseGridContainer');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            nurses.forEach(nurse => {
+                if (searchQuery && !nurse.name.toLowerCase().includes(searchQuery)) return;
+                const totals = { P: 0, S: 0, M: 0, L: 0 };
+                nurse.schedule.forEach(s => { if(totals[s] !== undefined) totals[s]++; });
+                const totalKerja = totals.P + totals.S + totals.M;
+                const progress = Math.min((totalKerja / 26) * 100, 100); 
+                
+                const totalMenit = totalKerja * 495;
+                const totalJam = Math.floor(totalMenit / 60);
+                const sisaMenit = totalMenit % 60;
+                
+                const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nurse.name)}&background=random&color=fff&rounded=true&bold=true`;
+                
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="glass-card rounded-[20px] md:rounded-[24px] p-4 md:p-6 card-lift relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-brand-500/5 rounded-full blur-xl md:blur-2xl -mr-8 -mt-8 md:-mr-10 md:-mt-10"></div>
+                        <div class="relative z-10 flex items-start justify-between mb-4 md:mb-5">
+                            <div class="flex items-center gap-3 md:gap-4 w-full">
+                                <img src="${avatar}" class="w-10 h-10 md:w-14 md:h-14 rounded-full shadow-md border-2 border-white dark:border-slate-700 shrink-0">
+                                <div class="w-full min-w-0">
+                                    <h4 class="font-display font-bold text-slate-800 dark:text-white leading-tight text-xs md:text-base truncate" title="${nurse.name}">${nurse.name}</h4>
+                                    <span class="inline-flex mt-0.5 md:mt-1 items-center gap-1 md:gap-1.5 px-1.5 md:px-2 py-0.5 rounded-md bg-success/10 text-success text-[8px] md:text-[10px] font-bold uppercase tracking-wider">
+                                        <div class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-success"></div> Active
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 md:space-y-4 relative z-10">
+                            <div>
+                                <div class="flex justify-between text-[10px] md:text-xs font-semibold mb-1 md:mb-1.5"><span class="text-slate-500">Beban Kerja</span><span class="text-brand-600">${totalKerja} Shift (${totalJam}j ${sisaMenit}m)</span></div>
+                                <div class="w-full h-1.5 md:h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-brand-400 to-teal-400 rounded-full" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-4 gap-1.5 md:gap-2 pt-1.5 md:pt-2 border-t border-slate-100 dark:border-slate-700/50">
+                                <div class="text-center p-1.5 md:p-2 rounded-lg md:rounded-xl bg-blue-50/50 dark:bg-blue-900/20"><p class="text-[8px] md:text-[10px] font-bold text-slate-400">P</p><p class="font-bold text-[11px] md:text-base text-blue-600">${totals.P}</p></div>
+                                <div class="text-center p-1.5 md:p-2 rounded-lg md:rounded-xl bg-amber-50/50 dark:bg-amber-900/20"><p class="text-[8px] md:text-[10px] font-bold text-slate-400">S</p><p class="font-bold text-[11px] md:text-base text-amber-600">${totals.S}</p></div>
+                                <div class="text-center p-1.5 md:p-2 rounded-lg md:rounded-xl bg-purple-50/50 dark:bg-purple-900/20"><p class="text-[8px] md:text-[10px] font-bold text-slate-400">M</p><p class="font-bold text-[11px] md:text-base text-purple-600">${totals.M}</p></div>
+                                <div class="text-center p-1.5 md:p-2 rounded-lg md:rounded-xl bg-slate-50/50 dark:bg-slate-800/50"><p class="text-[8px] md:text-[10px] font-bold text-slate-400">L</p><p class="font-bold text-[11px] md:text-base text-slate-600">${totals.L}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        function updateKPIs() {
+            try {
+                let tP=0, tS=0, tM=0;
+                nurses.forEach(n => { n.schedule.forEach(s => { if(s==='P') tP++; if(s==='S') tS++; if(s==='M') tM++; }); });
+                if(document.getElementById('kpiPagi')) document.getElementById('kpiPagi').innerText = tP;
+                if(document.getElementById('kpiSore')) document.getElementById('kpiSore').innerText = tS;
+                if(document.getElementById('kpiMalam')) document.getElementById('kpiMalam').innerText = tM;
+                if(document.getElementById('kpiInsiden')) document.getElementById('kpiInsiden').innerText = actionsLog.length;
+            } catch (err) { console.warn(err); }
+        }
+
+        function renderCharts() {
+            try {
+                let weeklyWorkload = [0, 0, 0, 0, 0];
+                nurses.forEach(n => {
+                    n.schedule.forEach((shift, index) => {
+                        const week = Math.floor(index / 7);
+                        if(shift !== 'L' && week < 5) weeklyWorkload[week]++;
+                    });
+                });
+
+                const isDark = document.documentElement.classList.contains('dark');
+                const txt = isDark ? '#94a3b8' : '#64748b';
+                const grid = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+                Chart.defaults.font.family = "'Inter', sans-serif";
+                Chart.defaults.color = txt;
+
+                const ctxB = document.getElementById('barChart');
+                if(!ctxB) return;
+                if(barChartInstance) barChartInstance.destroy();
+                
+                const grad = ctxB.getContext('2d').createLinearGradient(0, 0, 0, 400);
+                grad.addColorStop(0, '#3b82f6'); grad.addColorStop(1, '#2dd4bf');
+
+                barChartInstance = new Chart(ctxB, {
+                    type: 'bar',
+                    data: { labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'], datasets: [{ label: 'Shift Kerja', data: weeklyWorkload, backgroundColor: grad, borderRadius: 8 }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: grid } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+                });
+            } catch (err) { console.warn(err); }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            if(!toast) return;
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            setTimeout(() => { toast.classList.add('-translate-y-20', 'opacity-0'); }, 3000);
+        }
+    </script>
+</body>
+</html>
