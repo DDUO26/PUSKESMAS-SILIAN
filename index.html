@@ -14,6 +14,10 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Firebase SDK (Penting untuk Sinkronisasi Cloud) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -338,6 +342,7 @@
                             <p class="text-sm text-slate-500 mt-1">Upload PDF jadwal → Sinkronisasi otomatis. Atau double-klik sel untuk edit manual.</p>
                         </div>
                         
+                        <!-- UPLOAD & SYNC BUTTONS -->
                         <div class="flex flex-wrap gap-3 items-center">
                             <input type="file" id="uploadFile" class="hidden" accept=".pdf" onchange="handleFileUpload(event)">
                             <button id="btnPilihFile" onclick="document.getElementById('uploadFile').click()" class="px-4 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl font-medium text-sm transition-all flex items-center gap-2 shadow-sm card-lift">
@@ -532,7 +537,7 @@
                 <section id="view-pengaturan" class="view-section space-y-6 animate-fade-in">
                     <div class="mb-2">
                         <h3 class="text-xl font-display font-bold text-slate-800 dark:text-white">Pengaturan Sistem</h3>
-                        <p class="text-sm text-slate-500">Personalisasi tampilan dan manajemen data aplikasi (Auto-save Enabled).</p>
+                        <p class="text-sm text-slate-500">Personalisasi tampilan dan manajemen data aplikasi.</p>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -569,7 +574,7 @@
                             <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
                                 <h4 class="font-bold text-slate-800 dark:text-white">Manajemen Data & Keamanan</h4>
                                 <span id="autoSaveIndicator" class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-success inline-block animate-pulse"></span> Auto-save aktif
+                                    Menunggu koneksi...
                                 </span>
                             </div>
                             
@@ -642,7 +647,21 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Array Master Jadwal Presisi (Hasil Parsing 100% dari File JADWAL PERAWAT BULAN JUNI_3.pdf)
+        // INIT FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDAs_2GIu_BT6W7DrUonMwUvdw7Guq1jDs",
+            authDomain: "dduoapps.firebaseapp.com",
+            databaseURL: "https://dduoapps-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "dduoapps",
+            storageBucket: "dduoapps.firebasestorage.app",
+            messagingSenderId: "911778666047",
+            appId: "1:911778666047:web:1652b02ab2090e7f1d8a8a",
+            measurementId: "G-FPD7VY6MVT"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Base Data
         const baseNurses = [
             { name: "Siti Mokodongan, A.Md.Kep", schedule: ["P","P","L","L","P","P","P","L","L","P","S","M","L","P","S","M","L","P","L","M","L","L","P","S","M","L","P","P","P","L"] },
             { name: "Aviva Nelwan, A.Md.Kep", schedule: ["S","M","L","L","P","S","M","L","L","P","P","P","L","P","P","P","L","S","P","M","L","L","P","S","M","L","L","P","P","L"] },
@@ -672,8 +691,9 @@
         let actionsLog = [];
         let settingsApp = {};
 
-        // --- LOCAL STORAGE HANDLING ---
+        // --- STATE HANDLING (LOKAL + FIREBASE) ---
         function loadState() {
+            // 1. Instan Render dari LocalStorage agar layar tidak kosong (menghindari blank screen)
             const saved = localStorage.getItem('dutyFlowDB_2026');
             if (saved) {
                 try {
@@ -681,10 +701,6 @@
                     nurses      = parsed.nurses      || JSON.parse(JSON.stringify(baseNurses));
                     actionsLog  = parsed.actionsLog  || [];
                     settingsApp = parsed.settingsApp || JSON.parse(JSON.stringify(defaultSettings));
-                    // Migrasi data lama: pastikan timePagi/timeSore/timeMalam ada
-                    if (!settingsApp.timePagi)  settingsApp.timePagi  = defaultSettings.timePagi;
-                    if (!settingsApp.timeSore)  settingsApp.timeSore  = defaultSettings.timeSore;
-                    if (!settingsApp.timeMalam) settingsApp.timeMalam = defaultSettings.timeMalam;
                 } catch(e) {
                     initDefaults();
                 }
@@ -692,79 +708,103 @@
                 initDefaults();
             }
             applySettingsToDOM();
+            syncData();
+
+            // 2. Real-time Firebase Sync (Source of Truth)
+            db.ref('dutyFlowData').on('value', (snapshot) => {
+                const cloudData = snapshot.val();
+                if (cloudData) {
+                    nurses      = cloudData.nurses      || JSON.parse(JSON.stringify(baseNurses));
+                    actionsLog  = cloudData.actionsLog  || [];
+                    settingsApp = cloudData.settingsApp || JSON.parse(JSON.stringify(defaultSettings));
+                    
+                    // Backup ke local
+                    localStorage.setItem('dutyFlowDB_2026', JSON.stringify({ nurses, actionsLog, settingsApp }));
+                    
+                    applySettingsToDOM();
+                    syncData();
+                    
+                    // Ubah Indikator ke Online
+                    const indicator = document.getElementById('autoSaveIndicator');
+                    if (indicator) {
+                        indicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-success inline-block animate-pulse"></span> Cloud Synced (Real-time)';
+                        indicator.classList.remove('text-slate-400');
+                        indicator.classList.add('text-success');
+                    }
+                } else {
+                    // Kalau di Firebase kosong (pertama kali), lempar data lokal ke sana
+                    db.ref('dutyFlowData').set({ nurses, actionsLog, settingsApp });
+                }
+            });
         }
 
         function initDefaults() {
             nurses = JSON.parse(JSON.stringify(baseNurses));
             actionsLog = [];
             settingsApp = JSON.parse(JSON.stringify(defaultSettings));
-            saveState();
         }
 
         function saveState() {
             try {
-                localStorage.setItem('dutyFlowDB_2026', JSON.stringify({ nurses, actionsLog, settingsApp }));
-                // Update indikator auto-save di UI jika elemen tersedia
-                const indicator = document.getElementById('autoSaveIndicator');
-                if (indicator) {
-                    indicator.textContent = '✓ Tersimpan ' + new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-                    indicator.classList.remove('text-slate-400');
-                    indicator.classList.add('text-success');
-                    clearTimeout(window._saveIndicatorTimer);
-                    window._saveIndicatorTimer = setTimeout(() => {
-                        indicator.classList.remove('text-success');
-                        indicator.classList.add('text-slate-400');
-                    }, 3000);
-                }
+                const dataToSave = { nurses, actionsLog, settingsApp };
+                
+                // Simpan Lokal
+                localStorage.setItem('dutyFlowDB_2026', JSON.stringify(dataToSave));
+                
+                // Simpan ke Firebase
+                db.ref('dutyFlowData').set(dataToSave).catch(e => console.warn('Firebase save failed:', e));
+                
             } catch (e) {
-                console.warn('localStorage penuh atau tidak tersedia:', e);
+                console.warn('Save failed:', e);
             }
         }
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            
             // Inisialisasi PDF.js worker
             if (typeof pdfjsLib !== 'undefined') {
-                pdfjsLib.GlobalWorkerOptions.workerSrc =
-                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             }
+            
             loadState();
             
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('currentDateText').innerHTML = `<i data-lucide="calendar" class="w-3.5 h-3.5"></i> ${new Date().toLocaleDateString('id-ID', options)}`;
             
-            syncData();
             switchView('dashboard');
             
-            // Event Listeners (Dibungkus Try-Catch agar Form tidak memblokir simpanan)
-            document.getElementById('searchNurse').addEventListener('input', (e) => renderNurseCards(e.target.value.toLowerCase()));
-            document.getElementById('actionNurse').addEventListener('change', previewShift);
-            document.getElementById('actionDate').addEventListener('change', previewShift);
-            
-            const form = document.getElementById('actionForm');
-            if(form) {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    try {
-                        handleActionSubmit();
-                    } catch(err) {
-                        console.error(err);
-                        showToast("Terjadi kesalahan sistem, memuat ulang tabel...");
-                        syncData();
+            // Event Listeners Anti-Crash
+            try {
+                document.getElementById('searchNurse').addEventListener('input', (e) => renderNurseCards(e.target.value.toLowerCase()));
+                document.getElementById('actionNurse').addEventListener('change', previewShift);
+                document.getElementById('actionDate').addEventListener('change', previewShift);
+                
+                const form = document.getElementById('actionForm');
+                if(form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        try {
+                            handleActionSubmit();
+                        } catch(err) {
+                            console.error(err);
+                            showToast("Terjadi kesalahan sistem, memuat ulang tabel...");
+                            syncData();
+                        }
+                    });
+                }
+
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    document.documentElement.classList.toggle('dark');
+                });
+                
+                window.addEventListener('click', function(e){
+                    if (!document.getElementById('notifDropdown').contains(e.target) && !e.target.closest('button[onclick="toggleNotifDropdown()"]')){
+                        document.getElementById('notifDropdown').classList.add('hidden');
                     }
                 });
-            }
-
-            document.getElementById('themeToggle').addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark');
-            });
-            
-            window.addEventListener('click', function(e){
-                if (!document.getElementById('notifDropdown').contains(e.target) && !e.target.closest('button[onclick="toggleNotifDropdown()"]')){
-                    document.getElementById('notifDropdown').classList.add('hidden');
-                }
-            });
+            } catch(e) { console.warn(e); }
         });
 
         function syncData() {
@@ -815,18 +855,18 @@
         // --- DASHBOARD WIDGETS RENDERING ---
         function renderDashboardOverview() {
             try {
-                // Determine today bounded by 1-30
+                // Tentukan tanggal terbatas (1-30)
                 const d = new Date();
                 let today = d.getDate();
-                if (today > 30) today = 30; // Fallback bound
+                if (today > 30) today = 30; // Fallback jika lebih dari tgl 30
                 
                 let tglMalam = today + 1;
-                if (tglMalam > 30) tglMalam = 30; // Protect array boundaries
+                if (tglMalam > 30) tglMalam = 30;
 
-                // 1. Petugas Dinas Hari Ini
+                // 1. Petugas Dinas Berjalan
                 let dinasPagi = nurses.filter(n => n.schedule[today - 1] === 'P');
                 let dinasSore = nurses.filter(n => n.schedule[today - 1] === 'S');
-                let dinasMalam = nurses.filter(n => n.schedule[tglMalam - 1] === 'M'); // Besok
+                let dinasMalam = nurses.filter(n => n.schedule[tglMalam - 1] === 'M'); // Malam besoknya
 
                 let htmlDinas = `
                     <div class="space-y-4">
@@ -852,7 +892,7 @@
                 `;
                 document.getElementById('overviewDinasToday').innerHTML = htmlDinas;
 
-                // 2. Tebus Dinas (7 Hari Kedepan)
+                // 2. Jadwal Tebus (7 Hari Kedepan)
                 let pendingTebus = actionsLog.filter(log => {
                     if(log.type === 'Tukar Dinas' && log.status === 'Belum Ditebus' && log.repayDate) {
                         let rDate = parseInt(log.repayDate);
@@ -949,12 +989,12 @@
                     let indicator = '';
                     const swap = actionsLog.find(log => log.type === 'Tukar Dinas' && log.date === dateNum && (log.nurse1 === nurse.name || log.nurse2 === nurse.name));
                     if (swap) {
-                        const isRepaid = swap.status === 'Sudah Ditebus' || swap.status === 'Sudah Masuk'; // Use general completion indicator
+                        const isRepaid = swap.status === 'Sudah Ditebus' || swap.status === 'Sudah Masuk'; // Menganggap "Sudah Masuk" juga bagian dari selesai parsial
                         const col = isRepaid ? 'bg-success' : 'bg-warning animate-pulse';
                         indicator = `<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 shadow-sm ${col}"></span>`;
                     }
 
-                    // CHANGED: onclick to ondblclick
+                    // PENTING: Double click agar tidak salah pencet
                     row += `<td class="p-1 border-b border-slate-200 dark:border-slate-700">
                                 <div ondblclick="cycleShift('${nurse.name}', ${index})" class="w-full h-10 relative flex items-center justify-center rounded-lg text-xs font-bold shadow-sm cursor-pointer hover:ring-2 hover:ring-brand-500 transition-all ${sd.cls}" title="Double-klik untuk edit manual">
                                     ${sd.icon} <span class="ml-0.5">${shift}</span>
@@ -1075,7 +1115,7 @@
             const nurse1Index = nurses.findIndex(n => n.name === nurse1Name);
             const dayIndex = date - 1;
             
-            // Delete old data if editing
+            // Hapus data lama jika dalam mode edit
             if(editId) {
                 deleteAction(parseInt(editId), true);
                 document.getElementById('editActionId').value = ''; 
@@ -1163,9 +1203,8 @@
                         let narrative = "";
                         let selectHtml = "";
 
-                        // Format Narrative Keterangan
+                        // Format Keterangan
                         if (!isNurse1) {
-                            // Ini adalah PENGGANTI (Tugasnya MASUK)
                             narrative = `Menggantikan dinas <b>${sw.nurse1}</b> tanggal ${sw.date} Jun`;
                             const isMasuk = sw.status === 'Sudah Masuk' || sw.status === 'Sudah Ditebus';
                             const selectColor = isMasuk ? 'text-brand-600 bg-brand-50 border-brand-300' : 'text-warning bg-warning/10 border-warning/30';
@@ -1175,7 +1214,6 @@
                                     <option value="Sudah Masuk" ${isMasuk ? 'selected' : ''}>🏃 Sudah Masuk</option>
                                 </select>`;
                         } else {
-                            // Ini adalah PEMOHON (Tugasnya MENEBUS)
                             const repTxt = sw.repayDate ? `${sw.repayDate} Jun` : 'Tidak ada';
                             narrative = `Tebus dinas <b>${sw.nurse2}</b> (Tgl tebus: ${repTxt})`;
                             const isDone = sw.status === 'Sudah Ditebus';
@@ -1239,8 +1277,6 @@
                         .text-center { text-align: center; }
                         .text-right { text-align: right; }
                         .no-print { display: none !important; }
-                        
-                        /* Emulasi Styling Tailwind untuk Print */
                         .font-semibold { font-weight: 600; }
                         .font-bold { font-weight: bold; }
                         .text-slate-400 { color: #94a3b8; }
@@ -1259,8 +1295,6 @@
                         .bg-success { background-color: #10b981; }
                         .flex { display: flex; }
                         .flex-col { flex-direction: column; }
-                        
-                        /* Layout Tanda Tangan */
                         .signatures { display: flex; justify-content: space-between; margin-top: 60px; font-size: 12px; text-align: center; }
                         .sig-block { width: 30%; }
                         .sig-name { font-weight: bold; margin-top: 70px; text-decoration: underline; }
@@ -1270,19 +1304,13 @@
                     <h2>Laporan Status Integritas & Riwayat Tukar Dinas</h2>
                     <p class="subtitle">Bulan: Juni 2026 | Aplikasi DutyFlow</p>
                     ${tableHTML}
-                    
                     <div class="signatures">
                         <div class="sig-block">
                             Mengetahui,<br>Kepala Puskesmas
                             <div class="sig-name">${kapusName}</div>
                         </div>
                     </div>
-                    <script>
-                        setTimeout(() => {
-                            window.print();
-                            window.close();
-                        }, 500);
-                    <\/script>
+                    <script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script>
                 </body>
                 </html>
             `);
@@ -1501,7 +1529,6 @@
             document.getElementById('setJamSore').value   = settingsApp.timeSore;
             document.getElementById('setJamMalam').value  = settingsApp.timeMalam;
 
-            // Periksa jika elemen ada di DOM untuk diupdate
             if(document.getElementById('timePagiDisplay')) document.getElementById('timePagiDisplay').innerText  = `☀️ ${settingsApp.timePagi}`;
             if(document.getElementById('timeSoreDisplay')) document.getElementById('timeSoreDisplay').innerText  = `🌤️ ${settingsApp.timeSore}`;
             if(document.getElementById('timeMalamDisplay')) document.getElementById('timeMalamDisplay').innerText = `🌙 ${settingsApp.timeMalam}`;
@@ -1512,7 +1539,6 @@
             settingsApp.timePagi  = document.getElementById('setJamPagi').value;
             settingsApp.timeSore  = document.getElementById('setJamSore').value;
             settingsApp.timeMalam = document.getElementById('setJamMalam').value;
-            
             saveState();
             applySettingsToDOM();
             showToast("Pengaturan Sistem Berhasil Disimpan!");
@@ -1573,11 +1599,9 @@
                 try {
                     const imported = JSON.parse(e.target.result);
                     if (!imported.nurses || !Array.isArray(imported.nurses)) throw new Error('Format salah');
-                    
                     nurses = imported.nurses;
                     actionsLog = Array.isArray(imported.actionsLog) ? imported.actionsLog : [];
                     settingsApp = imported.settingsApp ? imported.settingsApp : JSON.parse(JSON.stringify(defaultSettings));
-
                     saveState();
                     applySettingsToDOM();
                     syncData();
