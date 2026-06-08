@@ -322,7 +322,7 @@
                     </div>
 
                     <!-- WIDGETS -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
                         <!-- Panel Perawat Jaga -->
                         <div class="glass-panel p-6 md:p-8 rounded-[24px] flex flex-col h-[400px]">
                             <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i> Perawat Jaga Hari Ini</h3>
@@ -344,6 +344,12 @@
                         <div class="glass-panel p-6 md:p-8 rounded-[24px] flex flex-col h-[400px]">
                             <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="arrow-left-right" class="w-5 h-5 text-purple-500"></i> Ganti & Tebus (7 Hari)</h3>
                             <div id="overviewTebus" class="flex-1 overflow-y-auto custom-scrollbar pr-2"></div>
+                        </div>
+
+                        <!-- Panel Leaderboard -->
+                        <div class="glass-panel p-6 md:p-8 rounded-[24px] flex flex-col h-[400px]">
+                            <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5 text-amber-500"></i> Frekuensi Tukar</h3>
+                            <div id="overviewLeaderboard" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3"></div>
                         </div>
                     </div>
                 </section>
@@ -861,6 +867,38 @@
                 `).join('') + `</div>`;
             }
             document.getElementById('overviewTebus').innerHTML = htmlTebus;
+
+            // --- LEADERBOARD LOGIC ---
+            let htmlLeaderboard = '';
+            let sortedSwappers = [];
+            for(let n in swapCounts) {
+                sortedSwappers.push({ name: n, count: swapCounts[n] });
+            }
+            sortedSwappers.sort((a,b) => b.count - a.count); 
+
+            if (sortedSwappers.length === 0) {
+                htmlLeaderboard = `<div class="h-full flex flex-col items-center justify-center text-center py-8 text-slate-400 text-sm"><i data-lucide="bar-chart-3" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>Belum ada data pertukaran.</div>`;
+            } else {
+                htmlLeaderboard = sortedSwappers.map((s, index) => {
+                    let badgeColor = index === 0 ? 'bg-amber-100 text-amber-600 border-amber-200 dark:bg-amber-900/30' : 
+                                     index === 1 ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-slate-700' : 
+                                     index === 2 ? 'bg-orange-100 text-orange-600 border-orange-200 dark:bg-orange-900/30' : 
+                                     'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-800 dark:border-slate-700';
+                    return `
+                    <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/50">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs border ${badgeColor}">
+                            #${index + 1}
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs font-bold text-slate-800 dark:text-white">${s.name.split(',')[0]}</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 text-xs font-bold">${s.count}x</span>
+                    </div>
+                    `;
+                }).join('');
+            }
+            document.getElementById('overviewLeaderboard').innerHTML = htmlLeaderboard;
+
             lucide.createIcons();
         }
 
