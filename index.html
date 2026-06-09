@@ -35,17 +35,11 @@
                             50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
                             500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
                         },
-                        darkBg: '#0f172a', /* Lebih premium dari hitam murni */
+                        darkBg: '#0f172a',
                         success: '#10B981',
                         warning: '#F59E0B',
                         danger: '#EF4444',
-                        // Warna Shift Spesifik (Google/Notion style)
-                        shift: {
-                            pagi: '#3B82F6',   // Biru
-                            sore: '#F59E0B',   // Orange
-                            malam: '#8B5CF6',  // Ungu
-                            libur: '#F1F5F9'   // Abu/Putih
-                        }
+                        shift: { pagi: '#3B82F6', sore: '#F59E0B', malam: '#8B5CF6', libur: '#F1F5F9' }
                     },
                     boxShadow: {
                         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
@@ -68,78 +62,38 @@
     </script>
     
     <style>
-        /* Modern Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Premium Background Gradients */
         body {
             background-color: #f8fafc;
-            background-image: 
-                radial-gradient(circle at top left, rgba(59,130,246,0.1), transparent 40%),
-                radial-gradient(circle at bottom right, rgba(16,185,129,0.1), transparent 40%);
+            background-image: radial-gradient(circle at top left, rgba(59,130,246,0.1), transparent 40%), radial-gradient(circle at bottom right, rgba(16,185,129,0.1), transparent 40%);
             background-attachment: fixed;
         }
         .dark body {
             background-color: #0f172a;
-            background-image: 
-                radial-gradient(circle at top left, rgba(59,130,246,0.15), transparent 40%),
-                radial-gradient(circle at bottom right, rgba(16,185,129,0.15), transparent 40%);
+            background-image: radial-gradient(circle at top left, rgba(59,130,246,0.15), transparent 40%), radial-gradient(circle at bottom right, rgba(16,185,129,0.15), transparent 40%);
         }
 
-        /* Apple-like Glassmorphism */
         .glass-panel { 
-            background: rgba(255, 255, 255, 0.7); 
-            backdrop-filter: blur(24px); 
-            -webkit-backdrop-filter: blur(24px); 
-            border: 1px solid rgba(255, 255, 255, 0.5); 
-            box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
         }
         .dark .glass-panel { 
-            background: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(24px); 
-            -webkit-backdrop-filter: blur(24px); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.3);
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.3);
         }
 
-        /* Sidebar Active Navigation Magic */
-        .nav-btn {
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        .nav-btn::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 0;
-            width: 4px;
-            background-color: #3b82f6;
-            border-radius: 0 4px 4px 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .nav-btn { position: relative; transition: all 0.3s ease; }
+        .nav-btn::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 0; width: 4px; background-color: #3b82f6; border-radius: 0 4px 4px 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .nav-btn.active::before { height: 70%; }
-        .nav-btn.active {
-            background: rgba(59, 130, 246, 0.08) !important;
-            color: #3b82f6 !important;
-            box-shadow: 0 0 25px rgba(59,130,246,0.15);
-        }
-        .dark .nav-btn.active {
-            background: rgba(59, 130, 246, 0.15) !important;
-            color: #60a5fa !important;
-            box-shadow: 0 0 25px rgba(59,130,246,0.25);
-        }
+        .nav-btn.active { background: rgba(59, 130, 246, 0.08) !important; color: #3b82f6 !important; box-shadow: 0 0 25px rgba(59,130,246,0.15); }
+        .dark .nav-btn.active { background: rgba(59, 130, 246, 0.15) !important; color: #60a5fa !important; box-shadow: 0 0 25px rgba(59,130,246,0.25); }
 
-        /* SPA View Transitions */
         .view-section { display: none; }
         .view-section.active { display: block; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* Calendar Mode Matriks */
         .calendar-table { border-collapse: separate; border-spacing: 0 8px; }
         .calendar-cell { width: 44px; min-width: 44px; text-align: center; padding: 0 2px; }
         .sticky-col { position: sticky; left: 0; z-index: 20; }
@@ -149,12 +103,8 @@
         .card-lift:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.1); }
         .dark .card-lift:hover { box-shadow: 0 12px 24px -8px rgba(0,0,0,0.5); }
 
-        /* Timeline Styles */
         .timeline-container { position: relative; padding-left: 1.5rem; margin-top: 1rem; }
-        .timeline-container::before {
-            content: ''; position: absolute; left: 0.375rem; top: 0; bottom: 0; width: 2px;
-            background: linear-gradient(to bottom, #e2e8f0 0%, transparent 100%);
-        }
+        .timeline-container::before { content: ''; position: absolute; left: 0.375rem; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, #e2e8f0 0%, transparent 100%); }
         .dark .timeline-container::before { background: linear-gradient(to bottom, #334155 0%, transparent 100%); }
     </style>
 </head>
@@ -181,34 +131,19 @@
             
             <nav class="flex-1 py-6 space-y-1 overflow-y-auto custom-scrollbar">
                 <p class="px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Intelligence</p>
-                
-                <button onclick="switchView('dashboard')" class="nav-btn active w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Overview</span>
-                </button>
-                <button onclick="switchView('kalender')" class="nav-btn w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group">
-                    <i data-lucide="calendar-range" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Jadwal Cerdas</span>
-                </button>
-                <button onclick="switchView('perawat')" class="nav-btn w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group">
-                    <i data-lucide="users" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Data Personil</span>
-                </button>
+                <button onclick="switchView('dashboard')" class="nav-btn active w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group"><i data-lucide="layout-dashboard" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Overview</span></button>
+                <button onclick="switchView('kalender')" class="nav-btn w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group"><i data-lucide="calendar-range" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Jadwal Cerdas</span></button>
+                <button onclick="switchView('perawat')" class="nav-btn w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group"><i data-lucide="users" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Data Personil</span></button>
                 
                 <p class="px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-6 mb-3">Operations</p>
-
                 <button onclick="switchView('aksi')" class="nav-btn w-full flex items-center justify-between px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="arrow-left-right" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Kelola Pertukaran</span>
-                    </div>
+                    <div class="flex items-center gap-3"><i data-lucide="arrow-left-right" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Kelola Pertukaran</span></div>
                     <span id="pendingSwapBadge" class="hidden bg-warning/20 text-warning border border-warning/30 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-glow">!</span>
                 </button>
-                <button onclick="switchView('laporan')" class="nav-btn w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group">
-                    <i data-lucide="activity" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Log Aktivitas</span>
-                </button>
+                <button onclick="switchView('laporan')" class="nav-btn w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group"><i data-lucide="activity" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Log Aktivitas</span></button>
 
                 <p class="px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-6 mb-3">System</p>
-
-                <button onclick="switchView('pengaturan')" class="nav-btn w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group">
-                    <i data-lucide="settings-2" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Pengaturan</span>
-                </button>
+                <button onclick="switchView('pengaturan')" class="nav-btn w-full flex items-center gap-3 px-6 py-3.5 text-left font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all group"><i data-lucide="settings-2" class="w-5 h-5 transition-transform group-hover:scale-110"></i> <span>Pengaturan</span></button>
             </nav>
 
             <div class="p-4 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-200/50 dark:border-slate-700/50">
@@ -237,14 +172,11 @@
                 </div>
                 
                 <div class="flex items-center gap-4 md:gap-6">
-                    <!-- Notification Bell -->
                     <div class="relative">
                         <button onclick="toggleNotifDropdown()" class="relative p-2.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-brand-500 transition-all">
                             <i data-lucide="bell" class="w-5 h-5"></i>
                             <span id="headerNotifBadge" class="hidden absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-danger rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
                         </button>
-                        
-                        <!-- Notification Dropdown -->
                         <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
                             <div class="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
                                 <h4 class="font-bold text-sm text-slate-800 dark:text-white">Notifikasi Action</h4>
@@ -259,9 +191,7 @@
                             <p id="headerHeadName" class="text-sm font-bold text-slate-800 dark:text-white leading-tight">Admin</p>
                             <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Administrator</p>
                         </div>
-                        <div class="relative" id="headerAvatarContainer">
-                            <!-- Local Avatar injected via JS -->
-                        </div>
+                        <div class="relative" id="headerAvatarContainer"></div>
                     </div>
                 </div>
             </header>
@@ -271,29 +201,24 @@
                 
                 <!-- 1. DASHBOARD VIEW (D.DUO COMMAND CENTER) -->
                 <section id="view-dashboard" class="view-section active space-y-6 animate-fade-in">
-                    <!-- Hero Section Modern -->
                     <div>
                         <h2 class="text-2xl font-display font-bold text-slate-800 dark:text-white mb-4">Command Overview</h2>
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <!-- Stat 1 -->
                             <div class="glass-panel p-5 md:p-6 rounded-[24px] card-lift relative overflow-hidden">
                                 <div class="absolute top-0 right-0 p-4 opacity-10 dark:opacity-20"><i data-lucide="users" class="w-16 h-16 text-brand-500"></i></div>
                                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pegawai Aktif</p>
                                 <h3 class="text-3xl font-display font-bold text-slate-800 dark:text-white flex items-end gap-2" id="dashHeroPegawai">0 <span class="text-sm text-brand-500 mb-1">Personil</span></h3>
                             </div>
-                            <!-- Stat 2 -->
                             <div class="glass-panel p-5 md:p-6 rounded-[24px] card-lift relative overflow-hidden">
                                 <div class="absolute top-0 right-0 p-4 opacity-10 dark:opacity-20"><i data-lucide="arrow-left-right" class="w-16 h-16 text-warning"></i></div>
                                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pertukaran Dinas</p>
                                 <h3 class="text-3xl font-display font-bold text-slate-800 dark:text-white flex items-end gap-2" id="dashHeroTukar">0 <span class="text-sm text-warning mb-1">Bulan Ini</span></h3>
                             </div>
-                            <!-- Stat 3 -->
                             <div class="glass-panel p-5 md:p-6 rounded-[24px] card-lift relative overflow-hidden">
                                 <div class="absolute top-0 right-0 p-4 opacity-10 dark:opacity-20"><i data-lucide="shield-check" class="w-16 h-16 text-success"></i></div>
                                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kepatuhan Jadwal</p>
                                 <h3 class="text-3xl font-display font-bold text-slate-800 dark:text-white flex items-end gap-2" id="dashHeroKepatuhan">98<span class="text-xl">%</span></h3>
                             </div>
-                            <!-- Stat 4 -->
                             <div class="glass-panel p-5 md:p-6 rounded-[24px] card-lift relative overflow-hidden bg-gradient-to-br from-brand-600 to-indigo-600 text-white border-none shadow-glow">
                                 <div class="absolute top-0 right-0 p-4 opacity-20"><i data-lucide="clock" class="w-16 h-16"></i></div>
                                 <p class="text-xs font-bold text-brand-100 uppercase tracking-wider mb-2">Shift Saat Ini</p>
@@ -302,53 +227,42 @@
                         </div>
                     </div>
 
-                    <!-- Quick Actions (Command Center Floating Cards) -->
+                    <!-- Quick Actions -->
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 px-2">Quick Actions</p>
                         <div class="flex flex-wrap gap-3">
-                            <button onclick="switchView('aksi')" class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-brand-500 hover:text-brand-500 transition-all font-semibold text-sm text-slate-700 dark:text-slate-300 shadow-sm">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Tukar
-                            </button>
-                            <button onclick="printIntegritas()" class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-success hover:text-success transition-all font-semibold text-sm text-slate-700 dark:text-slate-300 shadow-sm">
-                                <i data-lucide="printer" class="w-4 h-4"></i> Cetak Laporan
-                            </button>
-                            <button onclick="switchView('perawat')" class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-purple-500 hover:text-purple-500 transition-all font-semibold text-sm text-slate-700 dark:text-slate-300 shadow-sm">
-                                <i data-lucide="users-2" class="w-4 h-4"></i> Kelola Pegawai
-                            </button>
-                            <button onclick="backupData()" class="flex items-center gap-2 px-4 py-2.5 bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400 border border-brand-200 dark:border-brand-800/50 rounded-xl hover:bg-brand-100 transition-all font-semibold text-sm shadow-sm">
-                                <i data-lucide="cloud-download" class="w-4 h-4"></i> Backup Cloud
-                            </button>
+                            <button onclick="switchView('aksi')" class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-brand-500 hover:text-brand-500 transition-all font-semibold text-sm text-slate-700 dark:text-slate-300 shadow-sm"><i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Tukar</button>
+                            <button onclick="printIntegritas()" class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-success hover:text-success transition-all font-semibold text-sm text-slate-700 dark:text-slate-300 shadow-sm"><i data-lucide="printer" class="w-4 h-4"></i> Cetak Laporan</button>
+                            <button onclick="switchView('perawat')" class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-purple-500 hover:text-purple-500 transition-all font-semibold text-sm text-slate-700 dark:text-slate-300 shadow-sm"><i data-lucide="users-2" class="w-4 h-4"></i> Kelola Pegawai</button>
+                            <button onclick="backupData()" class="flex items-center gap-2 px-4 py-2.5 bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400 border border-brand-200 dark:border-brand-800/50 rounded-xl hover:bg-brand-100 transition-all font-semibold text-sm shadow-sm"><i data-lucide="cloud-download" class="w-4 h-4"></i> Backup Cloud</button>
                         </div>
                     </div>
 
                     <!-- WIDGETS -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
-                        <!-- Panel Perawat Jaga -->
                         <div class="glass-panel p-6 md:p-8 rounded-[24px] flex flex-col h-[400px]">
                             <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="calendar-check" class="w-5 h-5 text-brand-500"></i> Perawat Jaga Hari Ini</h3>
                             <div id="overviewDinasToday" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3"></div>
                         </div>
 
-                        <!-- Smart Insights AI Panel -->
                         <div class="glass-panel p-6 md:p-8 rounded-[24px] flex flex-col h-[400px]">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-warning"></i> Smart Insight</h3>
                                 <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-brand-50 text-brand-600 uppercase tracking-widest border border-brand-200">AI Powered</span>
                             </div>
-                            <div id="overviewInsights" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
-                                <!-- Generated by JS -->
-                            </div>
+                            <div id="overviewInsights" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3"></div>
                         </div>
 
-                        <!-- Panel Tebus / Timeline Singkat -->
                         <div class="glass-panel p-6 md:p-8 rounded-[24px] flex flex-col h-[400px]">
                             <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="arrow-left-right" class="w-5 h-5 text-purple-500"></i> Ganti & Tebus (7 Hari)</h3>
                             <div id="overviewTebus" class="flex-1 overflow-y-auto custom-scrollbar pr-2"></div>
                         </div>
 
-                        <!-- Panel Leaderboard -->
                         <div class="glass-panel p-6 md:p-8 rounded-[24px] flex flex-col h-[400px]">
-                            <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5 text-amber-500"></i> Frekuensi Tukar</h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-display font-bold text-slate-800 dark:text-white flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-5 h-5 text-amber-500"></i> Frekuensi Tukar</h3>
+                                <button onclick="printLeaderboard()" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg transition-all" title="Cetak Laporan Pemohon"><i data-lucide="printer" class="w-4 h-4"></i></button>
+                            </div>
                             <div id="overviewLeaderboard" class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3"></div>
                         </div>
                     </div>
@@ -376,7 +290,6 @@
                     </div>
 
                     <div class="glass-panel rounded-[24px] overflow-hidden shadow-soft">
-                        <!-- Legend -->
                         <div class="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 p-4 flex flex-wrap gap-4 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                             <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-brand-500"></span> Pagi</div>
                             <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-warning"></span> Sore</div>
@@ -401,9 +314,7 @@
                                         <th class="pb-4 sticky-header bg-transparent min-w-[80px] text-center text-brand-500">Shift</th>
                                     </tr>
                                 </thead>
-                                <tbody id="matrixTableBody">
-                                    <!-- JS Generated Calendar View -->
-                                </tbody>
+                                <tbody id="matrixTableBody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -412,9 +323,7 @@
                 <!-- 3. DATA PERAWAT VIEW -->
                 <section id="view-perawat" class="view-section space-y-6 animate-fade-in">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-panel p-6 rounded-[24px]">
-                        <div>
-                            <h3 class="text-xl font-display font-bold text-slate-800 dark:text-white">Personil Tim</h3>
-                        </div>
+                        <div><h3 class="text-xl font-display font-bold text-slate-800 dark:text-white">Personil Tim</h3></div>
                         <div class="relative group w-full sm:w-auto">
                             <i data-lucide="search" class="absolute left-4 top-3 w-4 h-4 text-slate-400"></i>
                             <input type="text" id="searchNurse" placeholder="Cari personil..." class="w-full sm:w-80 pl-11 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all">
@@ -425,7 +334,6 @@
 
                 <!-- 4. RENCANA & AKSI VIEW -->
                 <section id="view-aksi" class="view-section space-y-6 animate-fade-in">
-                    <!-- Same structure, slightly styled -->
                     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:items-start">
                         <!-- Form Area -->
                         <div class="glass-panel p-6 md:p-8 rounded-[24px] xl:sticky xl:top-24">
@@ -435,7 +343,6 @@
                                 </div>
                                 <h3 class="text-xl font-display font-bold">Input Kejadian</h3>
                             </div>
-                            <!-- (Isi form sama, CSS input ditingkatkan sedikit) -->
                             <form id="actionForm" class="space-y-5">
                                 <input type="hidden" id="editActionId" value="">
                                 <div>
@@ -462,9 +369,15 @@
                                 <div id="previewOriginalShift" class="hidden overflow-hidden rounded-xl bg-brand-50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-800 p-4"></div>
 
                                 <div id="swapFields" class="hidden space-y-5 bg-slate-50/50 dark:bg-slate-800/30 p-5 rounded-xl border border-slate-200 dark:border-slate-700">
-                                    <div>
-                                        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Digantikan Oleh</label>
-                                        <select id="actionSwapWith" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none"></select>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Digantikan Oleh</label>
+                                            <select id="actionSwapWith" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none"></select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Siapa Pemohonnya?</label>
+                                            <select id="actionRequester" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none"></select>
+                                        </div>
                                     </div>
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
@@ -489,7 +402,7 @@
                             </form>
                         </div>
 
-                        <!-- Table Area -->
+                        <!-- Table Area (INI YANG SEBELUMNYA TERPOTONG) -->
                         <div class="xl:col-span-2 glass-panel p-6 md:p-8 rounded-[24px]">
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                                 <div>
@@ -528,21 +441,15 @@
                                 <p class="text-sm text-slate-500">Timeline kronologis riwayat pertukaran dan kehadiran.</p>
                             </div>
                         </div>
-
-                        <!-- Vertical Timeline UI -->
-                        <div id="analyticsTimeline" class="timeline-container pb-8">
-                            <!-- JS Generated -->
-                        </div>
+                        <div id="analyticsTimeline" class="timeline-container pb-8"></div>
                     </div>
                 </section>
 
                 <!-- 6. PENGATURAN SYSTEM -->
                 <section id="view-pengaturan" class="view-section space-y-6 animate-fade-in">
-                    <!-- Sama dengan sebelumnya, penyesuaian styling minor -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="glass-panel p-8 rounded-[24px] space-y-6">
                             <h4 class="font-display font-bold text-lg text-slate-800 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-4">Parameter Operasional</h4>
-                            
                             <div class="grid grid-cols-1 gap-4">
                                 <div><label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Kepala Puskesmas</label><input type="text" id="setKapusName" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none"></div>
                                 <div><label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Kepala Keperawatan</label><input type="text" id="setKaperName" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-brand-500 outline-none"></div>
@@ -563,7 +470,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="glass-panel p-8 rounded-[24px]">
                         <h4 class="font-display font-bold text-lg text-slate-800 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-4 mb-6">Ubah Nama Personil</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="settingsNursesGrid"></div>
@@ -578,10 +484,7 @@
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onclick="closeHistoryModal()"></div>
         <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl overflow-hidden animate-slide-up transform scale-100 border border-slate-200 dark:border-slate-700">
             <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/20">
-                <h3 class="text-xl font-display font-bold text-slate-800 dark:text-white flex items-center gap-3">
-                    <span id="modalHistoryAvatar"></span>
-                    <span id="modalHistoryTitle">Riwayat Pegawai</span>
-                </h3>
+                <h3 class="text-xl font-display font-bold text-slate-800 dark:text-white flex items-center gap-3"><span id="modalHistoryAvatar"></span><span id="modalHistoryTitle">Riwayat Pegawai</span></h3>
                 <button onclick="closeHistoryModal()" class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
@@ -603,7 +506,6 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // INIT FIREBASE CONFIG (Tetap sesuai aslinya)
         const firebaseConfig = {
             apiKey: "AIzaSyDAs_2GIu_BT6W7DrUonMwUvdw7Guq1jDs",
             authDomain: "dduoapps.firebaseapp.com",
@@ -617,7 +519,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. DATA JADWAL MASTER
         const baseNurses = [
             { name: "Siti Mokodongan, A.Md.Kep", schedule: ["P","P","L","L","P","P","P","L","L","P","S","M","L","P","S","M","L","P","L","M","L","L","P","S","M","L","P","P","P","L"] },
             { name: "Aviva Nelwan, A.Md.Kep", schedule: ["S","M","L","L","P","S","M","L","L","P","P","P","L","P","P","P","L","S","P","M","L","L","P","S","M","L","L","P","P","L"] },
@@ -637,37 +538,24 @@
             { name: "Tirsa Pondaag. S.kep, Ns", schedule: ["P","P","P","P","P","L","P","P","P","P","P","L","P","P","P","P","P","L","P","P","P","P","P","L","P","P","P","P","P","L"] }
         ];
 
-        const defaultSettings = {
-            kapusName: "Dr. Kepala Puskesmas", kaperName: "Ns. Kepala Keperawatan, S.Kep", karuName: "Dr. Winda M.",
-            timePagi: "07:00 - 14:00", timeSore: "14:00 - 21:00", timeMalam: "21:00 - 07:00"
-        };
-
+        const defaultSettings = { kapusName: "Dr. Kepala Puskesmas", kaperName: "Ns. Kepala Keperawatan, S.Kep", karuName: "Dr. Winda M.", timePagi: "07:00 - 14:00", timeSore: "14:00 - 21:00", timeMalam: "21:00 - 07:00" };
         let nurses = []; let actionsLog = []; let settingsApp = {};
 
-        // GENERATOR AVATAR GRADIENT LOKAL (Pengganti ui-avatars.com)
         function getLocalAvatar(name, size = 'w-10 h-10', textSz = 'text-sm') {
             const initials = name.substring(0, 2).toUpperCase();
-            const colors = [
-                'from-brand-500 to-indigo-600', 'from-teal-400 to-emerald-600', 
-                'from-amber-400 to-orange-500', 'from-purple-500 to-pink-600',
-                'from-rose-400 to-red-600', 'from-cyan-400 to-blue-600'
-            ];
-            let hash = 0;
-            for (let i = 0; i < name.length; i++) { hash = name.charCodeAt(i) + ((hash << 5) - hash); }
+            const colors = ['from-brand-500 to-indigo-600', 'from-teal-400 to-emerald-600', 'from-amber-400 to-orange-500', 'from-purple-500 to-pink-600', 'from-rose-400 to-red-600', 'from-cyan-400 to-blue-600'];
+            let hash = 0; for (let i = 0; i < name.length; i++) { hash = name.charCodeAt(i) + ((hash << 5) - hash); }
             const bg = colors[Math.abs(hash) % colors.length];
             return `<div class="${size} rounded-full flex items-center justify-center font-bold text-white ${textSz} shadow-md bg-gradient-to-br ${bg}">${initials}</div>`;
         }
 
-        // --- MANAJEMEN MEMORI ---
         function loadState() {
             const ind = document.getElementById('autoSaveIndicator');
             const saved = localStorage.getItem('dutyFlowDB_2026');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    nurses      = parsed.nurses      || JSON.parse(JSON.stringify(baseNurses));
-                    actionsLog  = parsed.actionsLog  || [];
-                    settingsApp = parsed.settingsApp || JSON.parse(JSON.stringify(defaultSettings));
+                    nurses = parsed.nurses || JSON.parse(JSON.stringify(baseNurses)); actionsLog = parsed.actionsLog || []; settingsApp = parsed.settingsApp || JSON.parse(JSON.stringify(defaultSettings));
                 } catch(e) { initDefaults(); }
             } else { initDefaults(); }
             
@@ -676,77 +564,47 @@
             db.ref('dutyFlowData').on('value', (snapshot) => {
                 const cloudData = snapshot.val();
                 if (cloudData) {
-                    nurses      = cloudData.nurses      || JSON.parse(JSON.stringify(baseNurses));
-                    actionsLog  = cloudData.actionsLog  || [];
-                    settingsApp = cloudData.settingsApp || JSON.parse(JSON.stringify(defaultSettings));
-                    
+                    nurses = cloudData.nurses || JSON.parse(JSON.stringify(baseNurses)); actionsLog = cloudData.actionsLog || []; settingsApp = cloudData.settingsApp || JSON.parse(JSON.stringify(defaultSettings));
                     localStorage.setItem('dutyFlowDB_2026', JSON.stringify({ nurses, actionsLog, settingsApp }));
                     applySettingsToDOM(); syncData();
-                    
                     if(ind) ind.innerHTML = '<div class="w-3 h-3 bg-success rounded-full animate-pulse border-2 border-white dark:border-slate-800"></div> <span class="text-success font-bold">Cloud Synced (Real-time)</span>';
-                } else {
-                    db.ref('dutyFlowData').set({ nurses, actionsLog, settingsApp });
-                }
+                } else { db.ref('dutyFlowData').set({ nurses, actionsLog, settingsApp }); }
             });
-
-            setTimeout(() => {
-                if(ind && !ind.innerText.includes('Cloud')) {
-                    ind.innerHTML = '<div class="w-3 h-3 bg-slate-400 rounded-full border-2 border-white dark:border-slate-800"></div> <span class="text-slate-400 font-bold">Offline Mode (Menunggu sinyal...)</span>';
-                }
-            }, 15000);
+            setTimeout(() => { if(ind && !ind.innerText.includes('Cloud')) ind.innerHTML = '<div class="w-3 h-3 bg-slate-400 rounded-full border-2 border-white dark:border-slate-800"></div> <span class="text-slate-400 font-bold">Offline Mode (Menunggu sinyal...)</span>'; }, 15000);
         }
 
-        function initDefaults() {
-            nurses = JSON.parse(JSON.stringify(baseNurses)); actionsLog = []; settingsApp = JSON.parse(JSON.stringify(defaultSettings));
-            localStorage.setItem('dutyFlowDB_2026', JSON.stringify({ nurses, actionsLog, settingsApp }));
-        }
+        function initDefaults() { nurses = JSON.parse(JSON.stringify(baseNurses)); actionsLog = []; settingsApp = JSON.parse(JSON.stringify(defaultSettings)); localStorage.setItem('dutyFlowDB_2026', JSON.stringify({ nurses, actionsLog, settingsApp })); }
+        function saveState() { try { const dataToSave = { nurses, actionsLog, settingsApp }; localStorage.setItem('dutyFlowDB_2026', JSON.stringify(dataToSave)); db.ref('dutyFlowData').set(dataToSave).catch(e => console.warn('Offline Save:', e)); } catch (e) {} }
 
-        function saveState() {
-            try {
-                const dataToSave = { nurses, actionsLog, settingsApp };
-                localStorage.setItem('dutyFlowDB_2026', JSON.stringify(dataToSave));
-                db.ref('dutyFlowData').set(dataToSave).catch(e => console.warn('Offline Save:', e));
-            } catch (e) {}
-        }
-
-        // --- EVENT LISTENER ---
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadState();
-            
-            // Header Jam (Simulasi Real-time)
             const updateClock = () => {
                 const now = new Date();
                 document.getElementById('currentDateText').innerHTML = `<i data-lucide="clock" class="w-3.5 h-3.5"></i> <span>${now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'short'})} • ${now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>`;
                 if(document.getElementById('dashHeroShiftTime')) {
-                    const h = now.getHours();
-                    let shift = 'Malam'; if(h>=7 && h<14) shift = 'Pagi'; else if(h>=14 && h<21) shift = 'Sore';
+                    const h = now.getHours(); let shift = 'Malam'; if(h>=7 && h<14) shift = 'Pagi'; else if(h>=14 && h<21) shift = 'Sore';
                     document.getElementById('dashHeroShiftInfo').innerHTML = `${shift} <span class="text-sm text-brand-200 mb-1 font-sans opacity-70">${now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>`;
                 }
             };
             updateClock(); setInterval(updateClock, 60000);
-            
             switchView('dashboard');
             
             try {
                 document.getElementById('searchNurse').addEventListener('input', (e) => renderNurseCards(e.target.value.toLowerCase()));
-                document.getElementById('actionNurse').addEventListener('change', previewShift);
+                document.getElementById('actionNurse').addEventListener('change', () => { previewShift(); updateRequesterOptions(); });
+                document.getElementById('actionSwapWith').addEventListener('change', updateRequesterOptions);
                 document.getElementById('actionDate').addEventListener('change', previewShift);
                 const btnSimpan = document.getElementById('actionForm');
                 if(btnSimpan) btnSimpan.addEventListener('submit', function(e) { e.preventDefault(); handleActionSubmit(); });
                 document.getElementById('themeToggle').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
-                window.addEventListener('click', function(e){
-                    if (!document.getElementById('notifDropdown').contains(e.target) && !e.target.closest('button[onclick="toggleNotifDropdown()"]')){
-                        document.getElementById('notifDropdown').classList.add('hidden');
-                    }
-                });
+                window.addEventListener('click', function(e){ if (!document.getElementById('notifDropdown').contains(e.target) && !e.target.closest('button[onclick="toggleNotifDropdown()"]')) document.getElementById('notifDropdown').classList.add('hidden'); });
             } catch(e) {}
         });
 
         function syncData() {
             try {
-                populateSelects(); renderMatrixCalendar(); renderNurseCards(); 
-                renderActionSummary(); renderAnalyticsTimeline(); updateNotifications(); renderSettingsNurses();
+                populateSelects(); renderMatrixCalendar(); renderNurseCards(); renderActionSummary(); renderAnalyticsTimeline(); updateNotifications(); renderSettingsNurses();
                 if(document.getElementById('view-dashboard').classList.contains('active')) renderDashboardOverview();
             } catch(e) {}
         }
@@ -754,325 +612,182 @@
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.add('active');
-            
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.getAttribute('onclick').includes(viewId)) {
-                    btn.classList.add('active');
-                    btn.classList.remove('text-slate-500', 'dark:text-slate-400');
-                } else {
-                    btn.classList.remove('active');
-                    btn.classList.add('text-slate-500', 'dark:text-slate-400');
-                }
+                if(btn.getAttribute('onclick').includes(viewId)) { btn.classList.add('active'); btn.classList.remove('text-slate-500', 'dark:text-slate-400'); } 
+                else { btn.classList.remove('active'); btn.classList.add('text-slate-500', 'dark:text-slate-400'); }
             });
-
             if(viewId === 'dashboard') setTimeout(renderDashboardOverview, 50);
         }
 
-        // --- 1. OVERVIEW DASHBOARD & SMART INSIGHTS ---
         function renderDashboardOverview() {
             const d = new Date(); let today = Math.min(d.getDate(), 30); let tmrw = Math.min(today + 1, 30);
-
-            // Update Hero Stats
             const swapsThisMonth = actionsLog.filter(l => l.type === 'Tukar Dinas').length;
             document.getElementById('dashHeroPegawai').innerHTML = `${nurses.length} <span class="text-sm text-brand-500 mb-1">Personil</span>`;
             document.getElementById('dashHeroTukar').innerHTML = `${swapsThisMonth} <span class="text-sm text-warning mb-1">Bulan Ini</span>`;
             
-            // Kepatuhan (Mock calculation: Total normal shift vs Alpa/Izin)
-            let totalShiftPlan = nurses.length * 26; // approx
-            let deviasi = actionsLog.filter(l => l.type === 'Alpa' || l.type === 'Sakit').length;
+            let totalShiftPlan = nurses.length * 26; let deviasi = actionsLog.filter(l => l.type === 'Alpa' || l.type === 'Sakit').length;
             let kepatuhan = Math.max(0, 100 - ((deviasi / totalShiftPlan) * 100)).toFixed(1);
             document.getElementById('dashHeroKepatuhan').innerHTML = `${kepatuhan}<span class="text-xl">%</span>`;
 
-            // Panel Perawat Jaga
-            let dinasPagi = nurses.filter(n => n.schedule[today - 1] === 'P');
-            let dinasSore = nurses.filter(n => n.schedule[today - 1] === 'S');
-            let dinasMalam = nurses.filter(n => n.schedule[tmrw - 1] === 'M'); 
-
+            let dinasPagi = nurses.filter(n => n.schedule[today - 1] === 'P'); let dinasSore = nurses.filter(n => n.schedule[today - 1] === 'S'); let dinasMalam = nurses.filter(n => n.schedule[tmrw - 1] === 'M'); 
             const renderDinas = (arr, icon, title, bg) => {
                 if(arr.length === 0) return '';
-                return `
-                <div class="p-4 rounded-[16px] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm flex items-start gap-4 card-lift">
-                    <div class="w-10 h-10 rounded-full ${bg} flex items-center justify-center shrink-0 shadow-sm text-lg">${icon}</div>
-                    <div class="flex-1">
-                        <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">${title}</p>
-                        <div class="flex flex-wrap gap-2">
-                            ${arr.map(n => `<span class="px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300">${n.name.split(',')[0]}</span>`).join('')}
-                        </div>
-                    </div>
-                </div>`;
+                return `<div class="p-4 rounded-[16px] bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm flex items-start gap-4 card-lift"><div class="w-10 h-10 rounded-full ${bg} flex items-center justify-center shrink-0 shadow-sm text-lg">${icon}</div><div class="flex-1"><p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">${title}</p><div class="flex flex-wrap gap-2">${arr.map(n => `<span class="px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-300">${n.name.split(',')[0]}</span>`).join('')}</div></div></div>`;
             };
 
-            document.getElementById('overviewDinasToday').innerHTML = 
-                renderDinas(dinasPagi, '☀️', 'Shift Pagi (Tgl '+today+')', 'bg-blue-100 dark:bg-blue-900/40 text-blue-500') +
-                renderDinas(dinasSore, '🌤️', 'Shift Sore (Tgl '+today+')', 'bg-amber-100 dark:bg-amber-900/40 text-amber-500') +
-                renderDinas(dinasMalam, '🌙', 'Shift Malam (Masuk Bsk)', 'bg-purple-100 dark:bg-purple-900/40 text-purple-500');
+            document.getElementById('overviewDinasToday').innerHTML = renderDinas(dinasPagi, '☀️', 'Shift Pagi (Tgl '+today+')', 'bg-blue-100 dark:bg-blue-900/40 text-blue-500') + renderDinas(dinasSore, '🌤️', 'Shift Sore (Tgl '+today+')', 'bg-amber-100 dark:bg-amber-900/40 text-amber-500') + renderDinas(dinasMalam, '🌙', 'Shift Malam (Masuk Bsk)', 'bg-purple-100 dark:bg-purple-900/40 text-purple-500');
 
-            // SMART INSIGHTS AI LOGIC
             let insightsHtml = '';
+            if(parseFloat(kepatuhan) > 95) insightsHtml += `<div class="p-3.5 bg-success/10 border border-success/20 rounded-xl flex gap-3 text-sm text-slate-700 dark:text-slate-200"><i data-lucide="check-circle" class="w-5 h-5 text-success shrink-0"></i> <span><strong class="text-success">Optimal:</strong> Kepatuhan jadwal berada di angka yang sangat baik (${kepatuhan}%).</span></div>`;
             
-            // Insight 1: Kepatuhan
-            if(parseFloat(kepatuhan) > 95) {
-                insightsHtml += `<div class="p-3.5 bg-success/10 border border-success/20 rounded-xl flex gap-3 text-sm text-slate-700 dark:text-slate-200"><i data-lucide="check-circle" class="w-5 h-5 text-success shrink-0"></i> <span><strong class="text-success">Optimal:</strong> Kepatuhan jadwal berada di angka yang sangat baik (${kepatuhan}%).</span></div>`;
-            }
-
-            // Insight 2: Pertukaran Terbanyak
-            let swapCounts = {};
-            actionsLog.filter(l => l.type === 'Tukar Dinas').forEach(l => {
-                swapCounts[l.nurse1] = (swapCounts[l.nurse1] || 0) + 1;
-                swapCounts[l.nurse2] = (swapCounts[l.nurse2] || 0) + 1;
-            });
-            let maxSwaps = 0; let topSwapper = "";
-            for(let n in swapCounts) { if(swapCounts[n] > maxSwaps) { maxSwaps = swapCounts[n]; topSwapper = n; } }
-            if(maxSwaps >= 3) {
-                insightsHtml += `<div class="p-3.5 bg-warning/10 border border-warning/20 rounded-xl flex gap-3 text-sm text-slate-700 dark:text-slate-200"><i data-lucide="alert-triangle" class="w-5 h-5 text-warning shrink-0"></i> <span><strong class="text-warning">Perhatian:</strong> ${topSwapper.split(',')[0]} memiliki frekuensi pertukaran dinas yang tinggi (${maxSwaps} kali).</span></div>`;
-            }
-
-            // Insight 3: Beban Kerja Kurang/Lebih
+            let swapCounts = {}; actionsLog.filter(l => l.type === 'Tukar Dinas').forEach(l => { swapCounts[l.nurse1] = (swapCounts[l.nurse1] || 0) + 1; swapCounts[l.nurse2] = (swapCounts[l.nurse2] || 0) + 1; });
+            let maxSwaps = 0; let topSwapper = ""; for(let n in swapCounts) { if(swapCounts[n] > maxSwaps) { maxSwaps = swapCounts[n]; topSwapper = n; } }
+            if(maxSwaps >= 3) insightsHtml += `<div class="p-3.5 bg-warning/10 border border-warning/20 rounded-xl flex gap-3 text-sm text-slate-700 dark:text-slate-200"><i data-lucide="alert-triangle" class="w-5 h-5 text-warning shrink-0"></i> <span><strong class="text-warning">Perhatian:</strong> ${topSwapper.split(',')[0]} memiliki frekuensi pertukaran dinas yang tinggi (${maxSwaps} kali).</span></div>`;
+            
             let kurangMalam = dinasMalam.length < 2 ? `Shift malam besok hanya dijaga ${dinasMalam.length} perawat.` : '';
-            if(kurangMalam) {
-                insightsHtml += `<div class="p-3.5 bg-danger/10 border border-danger/20 rounded-xl flex gap-3 text-sm text-slate-700 dark:text-slate-200"><i data-lucide="shield-alert" class="w-5 h-5 text-danger shrink-0"></i> <span><strong class="text-danger">Kekurangan Personil:</strong> ${kurangMalam}</span></div>`;
-            }
-
+            if(kurangMalam) insightsHtml += `<div class="p-3.5 bg-danger/10 border border-danger/20 rounded-xl flex gap-3 text-sm text-slate-700 dark:text-slate-200"><i data-lucide="shield-alert" class="w-5 h-5 text-danger shrink-0"></i> <span><strong class="text-danger">Kekurangan Personil:</strong> ${kurangMalam}</span></div>`;
+            
             if(!insightsHtml) insightsHtml = `<div class="text-center text-slate-400 py-6 text-sm"><i data-lucide="activity" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>Seluruh metrik berjalan normal.</div>`;
             document.getElementById('overviewInsights').innerHTML = insightsHtml;
 
-            // Panel Tebus 7 Hari
             let upcomingDuties = [];
             actionsLog.filter(l => l.type === 'Tukar Dinas').forEach(log => {
                 let dDate = parseInt(log.date); let rDate = log.repayDate ? parseInt(log.repayDate) : null;
-                if(dDate >= today && dDate <= today + 7) {
-                    upcomingDuties.push({ doer: log.nurse2, verb: `Menggantikan dinas <b>${log.originalShift1}</b>`, receiver: log.nurse1, date: dDate, bg: 'bg-brand-50 dark:bg-brand-900/30 border-brand-200' });
-                }
-                if(log.status !== 'Sudah Ditebus' && rDate && rDate >= today && rDate <= today + 7) {
-                    upcomingDuties.push({ doer: log.nurse1, verb: 'Menebus shift ke', receiver: log.nurse2, date: rDate, bg: 'bg-warning/10 border-warning/30' });
-                }
+                if(dDate >= today && dDate <= today + 7) upcomingDuties.push({ doer: log.nurse2, verb: `Menggantikan dinas <b>${log.originalShift1}</b>`, receiver: log.nurse1, date: dDate, bg: 'bg-brand-50 dark:bg-brand-900/30 border-brand-200' });
+                if(log.status !== 'Sudah Ditebus' && rDate && rDate >= today && rDate <= today + 7) upcomingDuties.push({ doer: log.nurse1, verb: 'Menebus shift ke', receiver: log.nurse2, date: rDate, bg: 'bg-warning/10 border-warning/30' });
             });
             upcomingDuties.sort((a,b) => a.date - b.date);
 
             let htmlTebus = '';
-            if(upcomingDuties.length === 0) {
-                htmlTebus = `<div class="h-full flex flex-col items-center justify-center text-center py-8 text-slate-400 text-sm"><i data-lucide="check" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>Tidak ada jadwal ganti atau<br>tebus dalam 7 hari kedepan.</div>`;
-            } else {
-                htmlTebus = `<div class="space-y-3">` + upcomingDuties.map(item => `
-                    <div class="p-3.5 rounded-xl border ${item.bg} flex justify-between items-center group">
-                        <div class="flex items-center gap-3">
-                            ${getLocalAvatar(item.doer, 'w-8 h-8', 'text-xs')}
-                            <div>
-                                <p class="text-xs font-bold text-slate-800 dark:text-white">${item.doer.split(',')[0]}</p>
-                                <p class="text-[10px] text-slate-500">${item.verb} <span class="font-semibold text-brand-600 dark:text-brand-400">${item.receiver.split(',')[0]}</span></p>
-                            </div>
-                        </div>
-                        <span class="px-2 py-1 rounded bg-white dark:bg-slate-900 shadow-sm text-[10px] font-bold">Tgl ${item.date}</span>
-                    </div>
-                `).join('') + `</div>`;
-            }
+            if(upcomingDuties.length === 0) htmlTebus = `<div class="h-full flex flex-col items-center justify-center text-center py-8 text-slate-400 text-sm"><i data-lucide="check" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>Tidak ada jadwal ganti atau<br>tebus dalam 7 hari kedepan.</div>`;
+            else htmlTebus = `<div class="space-y-3">` + upcomingDuties.map(item => `<div class="p-3.5 rounded-xl border ${item.bg} flex justify-between items-center group"><div class="flex items-center gap-3">${getLocalAvatar(item.doer, 'w-8 h-8', 'text-xs')}<div><p class="text-xs font-bold text-slate-800 dark:text-white">${item.doer.split(',')[0]}</p><p class="text-[10px] text-slate-500">${item.verb} <span class="font-semibold text-brand-600 dark:text-brand-400">${item.receiver.split(',')[0]}</span></p></div></div><span class="px-2 py-1 rounded bg-white dark:bg-slate-900 shadow-sm text-[10px] font-bold">Tgl ${item.date}</span></div>`).join('') + `</div>`;
             document.getElementById('overviewTebus').innerHTML = htmlTebus;
 
-            // --- LEADERBOARD LOGIC ---
-            let htmlLeaderboard = '';
-            let sortedSwappers = [];
-            for(let n in swapCounts) {
-                sortedSwappers.push({ name: n, count: swapCounts[n] });
-            }
+            let htmlLeaderboard = ''; let sortedSwappers = []; let reqCounts = {};
+            actionsLog.filter(l => l.type === 'Tukar Dinas').forEach(l => { let req = l.requester || l.nurse1; reqCounts[req] = (reqCounts[req] || 0) + 1; });
+            for(let n in swapCounts) sortedSwappers.push({ name: n, count: swapCounts[n] });
             sortedSwappers.sort((a,b) => b.count - a.count); 
 
-            if (sortedSwappers.length === 0) {
-                htmlLeaderboard = `<div class="h-full flex flex-col items-center justify-center text-center py-8 text-slate-400 text-sm"><i data-lucide="bar-chart-3" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>Belum ada data pertukaran.</div>`;
-            } else {
+            if (sortedSwappers.length === 0) htmlLeaderboard = `<div class="h-full flex flex-col items-center justify-center text-center py-8 text-slate-400 text-sm"><i data-lucide="bar-chart-3" class="w-8 h-8 mx-auto mb-2 opacity-30"></i>Belum ada data pertukaran.</div>`;
+            else {
                 htmlLeaderboard = sortedSwappers.map((s, index) => {
-                    let badgeColor = index === 0 ? 'bg-amber-100 text-amber-600 border-amber-200 dark:bg-amber-900/30' : 
-                                     index === 1 ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-slate-700' : 
-                                     index === 2 ? 'bg-orange-100 text-orange-600 border-orange-200 dark:bg-orange-900/30' : 
-                                     'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-800 dark:border-slate-700';
-                    return `
-                    <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/50">
-                        <div class="w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs border ${badgeColor}">
-                            #${index + 1}
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-xs font-bold text-slate-800 dark:text-white">${s.name.split(',')[0]}</p>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-lg bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 text-xs font-bold">${s.count}x</span>
-                    </div>
-                    `;
+                    let badgeColor = index === 0 ? 'bg-amber-100 text-amber-600 border-amber-200 dark:bg-amber-900/30' : index === 1 ? 'bg-slate-200 text-slate-600 border-slate-300 dark:bg-slate-700' : index === 2 ? 'bg-orange-100 text-orange-600 border-orange-200 dark:bg-orange-900/30' : 'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-800 dark:border-slate-700';
+                    return `<div class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/50"><div class="w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs border ${badgeColor}">#${index + 1}</div><div class="flex-1"><p class="text-xs font-bold text-slate-800 dark:text-white">${s.name.split(',')[0]}</p><p class="text-[10px] text-slate-500 font-semibold">${reqCounts[s.name] || 0}x Sebagai Pemohon</p></div><span class="px-2.5 py-1 rounded-lg bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 text-xs font-bold">${s.count}x Tukar</span></div>`;
                 }).join('');
             }
             document.getElementById('overviewLeaderboard').innerHTML = htmlLeaderboard;
-
             lucide.createIcons();
         }
 
-        // --- 2. JADWAL DINAS (CALENDAR MODE UI) ---
+        function printLeaderboard() {
+            let swapCounts = {}; let reqCounts = {};
+            actionsLog.filter(l => l.type === 'Tukar Dinas').forEach(l => { swapCounts[l.nurse1] = (swapCounts[l.nurse1] || 0) + 1; swapCounts[l.nurse2] = (swapCounts[l.nurse2] || 0) + 1; let req = l.requester || l.nurse1; reqCounts[req] = (reqCounts[req] || 0) + 1; });
+            let sortedSwappers = []; for(let n in swapCounts) sortedSwappers.push({ name: n, count: swapCounts[n] }); sortedSwappers.sort((a,b) => b.count - a.count);
+            
+            let printWin = window.open('', '_blank');
+            let html = `<html><head><title>Laporan Frekuensi Tukar Dinas</title><style>body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px; color: #1e293b; } table { border-collapse: collapse; margin-top: 20px; width: 100%; font-size: 14px; } th, td { border: 1px solid #cbd5e1; padding: 12px 16px; text-align: left; } th { background-color: #f1f5f9; color: #334155; font-weight: bold; text-transform: uppercase; font-size: 12px; } h2 { margin-bottom: 5px; color: #0f172a; } .subtitle { color: #64748b; font-size: 13px; margin-bottom: 30px; } .text-center { text-align: center; }</style></head><body><h2>Laporan Rekapitulasi Tukar Dinas & Pemohon</h2><div class="subtitle">Dicetak pada: ${new Date().toLocaleString('id-ID')}</div><table><thead><tr><th class="text-center" style="width: 80px;">Peringkat</th><th>Nama Pegawai</th><th class="text-center">Total Terlibat Tukar</th><th class="text-center">Sebagai Pemohon</th></tr></thead><tbody>${sortedSwappers.map((s, i) => `<tr><td class="text-center">#${i+1}</td><td><strong>${s.name}</strong></td><td class="text-center">${s.count} Kali</td><td class="text-center">${reqCounts[s.name] || 0} Kali</td></tr>`).join('')}</tbody></table><script>window.onload = function() { window.print(); setTimeout(()=>window.close(), 500); }<\/script></body></html>`;
+            printWin.document.write(html); printWin.document.close();
+        }
+
         let clickTimer = null;
         function cycleShift(nurseName, dayIndex) {
-            if (clickTimer == null) {
-                clickTimer = setTimeout(() => { clickTimer = null; }, 300);
-            } else {
-                clearTimeout(clickTimer); clickTimer = null;
-                const shiftCycle = {'P':'S', 'S':'M', 'M':'L', 'L':'P'};
-                let nIdx = nurses.findIndex(n => n.name === nurseName);
-                if(nIdx !== -1) {
-                    nurses[nIdx].schedule[dayIndex] = shiftCycle[nurses[nIdx].schedule[dayIndex]];
-                    saveState(); syncData(); showToast(`Shift diubah: ➔ ${nurses[nIdx].schedule[dayIndex]}`);
-                }
-            }
+            if (clickTimer == null) { clickTimer = setTimeout(() => { clickTimer = null; }, 300); } 
+            else { clearTimeout(clickTimer); clickTimer = null; const shiftCycle = {'P':'S', 'S':'M', 'M':'L', 'L':'P'}; let nIdx = nurses.findIndex(n => n.name === nurseName); if(nIdx !== -1) { nurses[nIdx].schedule[dayIndex] = shiftCycle[nurses[nIdx].schedule[dayIndex]]; saveState(); syncData(); showToast(`Shift diubah: ➔ ${nurses[nIdx].schedule[dayIndex]}`); } }
         }
 
-        function resetToMasterSchedule() {
-            if(confirm("PERINGATAN: Semua perubahan manual di kalender akan hilang. Lanjutkan?")) {
-                nurses = JSON.parse(JSON.stringify(baseNurses)); actionsLog = [];
-                saveState(); syncData(); showToast("Berhasil mereset ke Dokumen Master asli!");
-            }
-        }
+        function resetToMasterSchedule() { if(confirm("PERINGATAN: Semua perubahan manual di kalender akan hilang. Lanjutkan?")) { nurses = JSON.parse(JSON.stringify(baseNurses)); actionsLog = []; saveState(); syncData(); showToast("Berhasil mereset ke Dokumen Master asli!"); } }
 
         function getShiftColorBlocks(shift) {
-            if (shift === 'P') return 'bg-brand-500 text-white shadow-md shadow-brand-500/20';
-            if (shift === 'S') return 'bg-warning text-white shadow-md shadow-warning/20';
-            if (shift === 'M') return 'bg-purple-500 text-white shadow-md shadow-purple-500/20';
-            return 'bg-slate-100 text-slate-400 dark:bg-slate-800 border border-slate-200 dark:border-slate-700';
+            if (shift === 'P') return 'bg-brand-500 text-white shadow-md shadow-brand-500/20'; if (shift === 'S') return 'bg-warning text-white shadow-md shadow-warning/20'; if (shift === 'M') return 'bg-purple-500 text-white shadow-md shadow-purple-500/20'; return 'bg-slate-100 text-slate-400 dark:bg-slate-800 border border-slate-200 dark:border-slate-700';
         }
 
         function renderMatrixCalendar() {
-            const tbody = document.getElementById('matrixTableBody');
-            if(!tbody) return; tbody.innerHTML = '';
-            
+            const tbody = document.getElementById('matrixTableBody'); if(!tbody) return; tbody.innerHTML = '';
             nurses.forEach((nurse) => {
-                let row = `<tr class="group">
-                    <td class="py-2 pr-4 sticky-col bg-transparent z-20">
-                        <div class="flex items-center gap-3 p-2 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm group-hover:shadow-md transition-all">
-                            ${getLocalAvatar(nurse.name, 'w-8 h-8', 'text-xs')}
-                            <span class="font-bold text-[11px] whitespace-nowrap text-slate-700 dark:text-slate-200">${nurse.name.split(',')[0]}</span>
-                        </div>
-                    </td>`;
-                
+                let row = `<tr class="group"><td class="py-2 pr-4 sticky-col bg-transparent z-20"><div class="flex items-center gap-3 p-2 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm group-hover:shadow-md transition-all">${getLocalAvatar(nurse.name, 'w-8 h-8', 'text-xs')}<span class="font-bold text-[11px] whitespace-nowrap text-slate-700 dark:text-slate-200">${nurse.name.split(',')[0]}</span></div></td>`;
                 let totalKerja = 0;
                 nurse.schedule.forEach((shift, index) => {
                     if (shift !== 'L') totalKerja++;
-                    
-                    let indicator = '';
-                    const swap = actionsLog.find(log => log.type === 'Tukar Dinas' && log.date === (index+1) && (log.nurse1 === nurse.name || log.nurse2 === nurse.name));
-                    if (swap && swap.status !== 'Sudah Ditebus' && swap.status !== 'Sudah Masuk') {
-                        indicator = `<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 bg-warning shadow-glow"></span>`;
-                    }
-
+                    let indicator = ''; const swap = actionsLog.find(log => log.type === 'Tukar Dinas' && log.date === (index+1) && (log.nurse1 === nurse.name || log.nurse2 === nurse.name));
+                    if (swap && swap.status !== 'Sudah Ditebus' && swap.status !== 'Sudah Masuk') indicator = `<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 bg-warning shadow-glow"></span>`;
                     const blockColor = getShiftColorBlocks(shift);
-                    row += `<td class="calendar-cell py-2">
-                                <div onclick="cycleShift('${nurse.name}', ${index})" class="w-[38px] h-10 mx-auto relative flex items-center justify-center rounded-[10px] text-[11px] font-bold cursor-pointer hover:scale-110 transition-transform ${blockColor}">
-                                    ${shift} ${indicator}
-                                </div>
-                            </td>`;
+                    row += `<td class="calendar-cell py-2"><div onclick="cycleShift('${nurse.name}', ${index})" class="w-[38px] h-10 mx-auto relative flex items-center justify-center rounded-[10px] text-[11px] font-bold cursor-pointer hover:scale-110 transition-transform ${blockColor}">${shift} ${indicator}</div></td>`;
                 });
-                
-                row += `<td class="py-2 pl-4 text-center">
-                            <span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300">${totalKerja} Sft</span>
-                        </td></tr>`;
+                row += `<td class="py-2 pl-4 text-center"><span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300">${totalKerja} Sft</span></td></tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
             });
         }
 
-        // --- 3 & 4. FORM SELECTS & DATA PERAWAT ---
         function populateSelects() {
             const sel1 = document.getElementById('actionNurse'); const sel2 = document.getElementById('actionSwapWith');
-            if(!sel1 || !sel2) return;
-            const v1 = sel1.value; const v2 = sel2.value;
+            if(!sel1 || !sel2) return; const v1 = sel1.value; const v2 = sel2.value;
             sel1.innerHTML = '<option value="">Pilih...</option>'; sel2.innerHTML = '<option value="">Pilih...</option>';
-            nurses.forEach(n => {
-                sel1.insertAdjacentHTML('beforeend', `<option value="${n.name}">${n.name}</option>`);
-                sel2.insertAdjacentHTML('beforeend', `<option value="${n.name}">${n.name}</option>`);
-            });
+            nurses.forEach(n => { sel1.insertAdjacentHTML('beforeend', `<option value="${n.name}">${n.name}</option>`); sel2.insertAdjacentHTML('beforeend', `<option value="${n.name}">${n.name}</option>`); });
             sel1.value = v1; sel2.value = v2;
         }
 
         function toggleNotifDropdown() { document.getElementById('notifDropdown').classList.toggle('hidden'); }
         function updateNotifications() {
-            const today = new Date().getDate(); 
-            const alerts = actionsLog.filter(l => l.type === 'Tukar Dinas' && l.status === 'Belum Ditebus' && l.repayDate !== null && l.repayDate <= today);
+            const today = new Date().getDate(); const alerts = actionsLog.filter(l => l.type === 'Tukar Dinas' && l.status === 'Belum Ditebus' && l.repayDate !== null && l.repayDate <= today);
             const badgeH = document.getElementById('headerNotifBadge'); const count = document.getElementById('notifCount'); const list = document.getElementById('notifList');
             if(!badgeH) return;
             if(alerts.length > 0) {
                 badgeH.classList.remove('hidden'); count.innerText = alerts.length;
-                list.innerHTML = alerts.map(a => `
-                    <div class="p-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer" onclick="openHistoryModal('${a.nurse1}'); toggleNotifDropdown();">
-                        <p class="text-xs font-bold text-danger mb-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> Jatuh Tempo</p>
-                        <p class="text-[11px]"><b>${a.nurse1.split(',')[0]}</b> wajib menebus ke <b>${a.nurse2.split(',')[0]}</b></p>
-                    </div>
-                `).join(''); lucide.createIcons();
-            } else {
-                badgeH.classList.add('hidden'); count.innerText = "0"; list.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Semua aman terkendali.</div>';
-            }
+                list.innerHTML = alerts.map(a => `<div class="p-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer" onclick="openHistoryModal('${a.nurse1}'); toggleNotifDropdown();"><p class="text-xs font-bold text-danger mb-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> Jatuh Tempo</p><p class="text-[11px]"><b>${a.nurse1.split(',')[0]}</b> wajib menebus ke <b>${a.nurse2.split(',')[0]}</b></p></div>`).join(''); lucide.createIcons();
+            } else { badgeH.classList.add('hidden'); count.innerText = "0"; list.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">Semua aman terkendali.</div>'; }
         }
 
         function toggleSwapFields() {
-            const type = document.getElementById('actionType').value;
-            const swapFields = document.getElementById('swapFields');
-            const actionSwapWith = document.getElementById('actionSwapWith');
-            if (type === 'Tukar Dinas') {
-                swapFields.classList.remove('hidden'); swapFields.classList.add('animate-fade-in'); actionSwapWith.setAttribute('required', 'true');
-            } else {
-                swapFields.classList.add('hidden'); actionSwapWith.removeAttribute('required');
-            }
+            const type = document.getElementById('actionType').value; const swapFields = document.getElementById('swapFields'); const actionSwapWith = document.getElementById('actionSwapWith');
+            if (type === 'Tukar Dinas') { swapFields.classList.remove('hidden'); swapFields.classList.add('animate-fade-in'); actionSwapWith.setAttribute('required', 'true'); updateRequesterOptions(); } 
+            else { swapFields.classList.add('hidden'); actionSwapWith.removeAttribute('required'); }
             previewShift();
         }
 
+        function updateRequesterOptions() {
+            const n1 = document.getElementById('actionNurse').value; const n2 = document.getElementById('actionSwapWith').value; const reqSelect = document.getElementById('actionRequester');
+            if(!reqSelect) return; const currentVal = reqSelect.value;
+            reqSelect.innerHTML = '<option value="">Pilih Pemohon...</option>';
+            if(n1) reqSelect.innerHTML += `<option value="${n1}">${n1}</option>`;
+            if(n2 && n1 !== n2) reqSelect.innerHTML += `<option value="${n2}">${n2}</option>`;
+            if(currentVal === n1 || currentVal === n2) reqSelect.value = currentVal; else if(n1) reqSelect.value = n1;
+        }
+
         function previewShift() {
-            const nurseName = document.getElementById('actionNurse').value; const dateStr = document.getElementById('actionDate').value;
-            const previewBox = document.getElementById('previewOriginalShift'); const type = document.getElementById('actionType').value;
+            const nurseName = document.getElementById('actionNurse').value; const dateStr = document.getElementById('actionDate').value; const previewBox = document.getElementById('previewOriginalShift'); const type = document.getElementById('actionType').value;
             if (!nurseName || !dateStr || dateStr < 1 || dateStr > 30) { previewBox.classList.add('hidden'); return; }
-
-            const dayIndex = parseInt(dateStr) - 1; const nurse1 = nurses.find(n => n.name === nurseName);
-            const shift1 = nurse1.schedule[dayIndex];
+            const dayIndex = parseInt(dateStr) - 1; const nurse1 = nurses.find(n => n.name === nurseName); const shift1 = nurse1.schedule[dayIndex];
             let text = `<div class="flex justify-between items-center"><span class="text-xs font-bold text-slate-500">Shift Asli:</span> <span class="px-2 py-0.5 rounded text-xs font-bold ${getShiftColorBlocks(shift1)}">${shift1}</span></div>`;
-
             if(type === 'Tukar Dinas') {
                 const swapName = document.getElementById('actionSwapWith').value;
-                if(swapName) {
-                    const nurse2 = nurses.find(n => n.name === swapName); const shift2 = nurse2.schedule[dayIndex];
-                    text += `<div class="w-full h-px bg-brand-200 dark:bg-brand-800 my-2"></div><div class="flex justify-between items-center"><span class="text-xs font-bold text-slate-500">Shift Asli Pengganti:</span> <span class="px-2 py-0.5 rounded text-xs font-bold ${getShiftColorBlocks(shift2)}">${shift2}</span></div>`;
-                }
+                if(swapName) { const nurse2 = nurses.find(n => n.name === swapName); const shift2 = nurse2.schedule[dayIndex]; text += `<div class="w-full h-px bg-brand-200 dark:bg-brand-800 my-2"></div><div class="flex justify-between items-center"><span class="text-xs font-bold text-slate-500">Shift Asli Pengganti:</span> <span class="px-2 py-0.5 rounded text-xs font-bold ${getShiftColorBlocks(shift2)}">${shift2}</span></div>`; }
             }
             previewBox.innerHTML = text; previewBox.classList.remove('hidden');
         }
 
         function handleActionSubmit() {
-            const nurse1Name = document.getElementById('actionNurse').value; const date = parseInt(document.getElementById('actionDate').value);
-            const type = document.getElementById('actionType').value; const notes = document.getElementById('actionNotes').value || '-';
-            const editId = document.getElementById('editActionId').value;
+            const nurse1Name = document.getElementById('actionNurse').value; const date = parseInt(document.getElementById('actionDate').value); const type = document.getElementById('actionType').value; const notes = document.getElementById('actionNotes').value || '-'; const editId = document.getElementById('editActionId').value;
             const nurse1Index = nurses.findIndex(n => n.name === nurse1Name); const dayIndex = date - 1;
             
             if(editId) { deleteAction(parseInt(editId), true); document.getElementById('editActionId').value = ''; }
-
-            let logEntry = { id: Date.now(), date: date, nurse1: nurse1Name, type: type, notes: notes, originalShift1: nurses[nurse1Index].schedule[dayIndex], nurse2: null, originalShift2: null, status: null, repayDate: null };
+            let logEntry = { id: Date.now(), date: date, nurse1: nurse1Name, type: type, notes: notes, originalShift1: nurses[nurse1Index].schedule[dayIndex], nurse2: null, originalShift2: null, status: null, repayDate: null, requester: null };
 
             if (type === 'Tukar Dinas') {
                 const nurse2Name = document.getElementById('actionSwapWith').value;
-                if (!nurse2Name) { showToast("Pilih perawat pengganti!"); return; }
-                if (nurse1Name === nurse2Name) { showToast("Tidak bisa bertukar dengan diri sendiri!"); return; }
-
-                const status = document.getElementById('actionStatus').value; const repayDate = document.getElementById('actionRepayDate').value;
-                const nurse2Index = nurses.findIndex(n => n.name === nurse2Name);
-                
-                logEntry.nurse2 = nurse2Name; logEntry.originalShift2 = nurses[nurse2Index].schedule[dayIndex];
-                logEntry.status = status; logEntry.repayDate = repayDate ? parseInt(repayDate) : null;
-
-                let temp = nurses[nurse1Index].schedule[dayIndex];
-                nurses[nurse1Index].schedule[dayIndex] = nurses[nurse2Index].schedule[dayIndex];
-                nurses[nurse2Index].schedule[dayIndex] = temp;
+                if (!nurse2Name) { showToast("Pilih perawat pengganti!"); return; } if (nurse1Name === nurse2Name) { showToast("Tidak bisa bertukar dengan diri sendiri!"); return; }
+                const status = document.getElementById('actionStatus').value; const repayDate = document.getElementById('actionRepayDate').value; const requester = document.getElementById('actionRequester').value || nurse1Name; const nurse2Index = nurses.findIndex(n => n.name === nurse2Name);
+                logEntry.nurse2 = nurse2Name; logEntry.originalShift2 = nurses[nurse2Index].schedule[dayIndex]; logEntry.status = status; logEntry.repayDate = repayDate ? parseInt(repayDate) : null; logEntry.requester = requester;
+                let temp = nurses[nurse1Index].schedule[dayIndex]; nurses[nurse1Index].schedule[dayIndex] = nurses[nurse2Index].schedule[dayIndex]; nurses[nurse2Index].schedule[dayIndex] = temp;
             } else { nurses[nurse1Index].schedule[dayIndex] = 'L'; }
 
             actionsLog.push(logEntry); saveState(); showToast("Transaksi Berhasil Disimpan");
-            
             const form = document.getElementById('actionForm'); if(form) form.reset();
             document.getElementById('previewOriginalShift').classList.add('hidden'); toggleSwapFields(); syncData(); 
-            
-            const tableArea = document.getElementById('integritasTableWrapper');
-            if(tableArea) { tableArea.classList.add('ring-4', 'ring-brand-500/50', 'rounded-2xl', 'transition-all'); setTimeout(() => tableArea.classList.remove('ring-4', 'ring-brand-500/50'), 800); }
+            const tableArea = document.getElementById('integritasTableWrapper'); if(tableArea) { tableArea.classList.add('ring-4', 'ring-brand-500/50', 'rounded-2xl', 'transition-all'); setTimeout(() => tableArea.classList.remove('ring-4', 'ring-brand-500/50'), 800); }
         }
 
-        // --- RENDERING TABEL STATUS INTEGRITAS ---
         function renderActionSummary() {
-            const tbody = document.getElementById('actionSummaryTable');
-            if(!tbody) return; tbody.innerHTML = '';
-
+            const tbody = document.getElementById('actionSummaryTable'); if(!tbody) return; tbody.innerHTML = '';
             nurses.forEach(nurse => {
                 let tT=0, tS=0, tI=0, tA=0; let allSwaps=[];
                 actionsLog.forEach(log => {
@@ -1084,39 +799,25 @@
                 if (allSwaps.length > 0) {
                     const sorted = [...allSwaps].sort((a, b) => b.id - a.id);
                     swapDesc = `<div class="flex flex-col py-1 space-y-2">` + sorted.map((sw, idx) => {
-                        const isNurse1 = sw.nurse1 === nurse.name; 
-                        let narasi = "", selCol = "";
+                        const isNurse1 = sw.nurse1 === nurse.name; let narasi = "", selCol = "";
+                        let repayText = sw.repayDate ? `<br/><span class="text-[9px] text-brand-600 dark:text-brand-400 font-bold bg-brand-50 dark:bg-brand-900/30 px-1.5 py-0.5 rounded mt-1 inline-block border border-brand-200 dark:border-brand-800">Tebus: Tgl ${sw.repayDate}</span>` : '';
+                        
                         if (!isNurse1) {
-                            narasi = `Ganti dinas <b>${sw.originalShift1}</b> <b>${sw.nurse1.split(',')[0]}</b> tgl ${sw.date}`;
-                            const isMasuk = sw.status === 'Sudah Masuk' || sw.status === 'Sudah Ditebus';
-                            selCol = isMasuk ? 'text-brand-600 bg-brand-50 border-brand-200' : 'text-warning bg-warning/10 border-warning/30';
-                            return `<div class="flex items-center justify-between"><span class="text-[10px] leading-tight flex-1">${narasi}</span> <select onchange="event.stopPropagation(); updateRepayStatus(${sw.id}, this.value)" class="text-[9px] px-1.5 py-0.5 rounded border ${selCol} font-bold outline-none cursor-pointer w-24 shrink-0"><option value="Belum Masuk" ${sw.status==='Belum Masuk'?'selected':''}>⏳ Belum</option><option value="Sudah Masuk" ${isMasuk?'selected':''}>🏃 Selesai</option></select></div>`;
+                            narasi = `Ganti dinas <b>${sw.originalShift1}</b> <b>${sw.nurse1.split(',')[0]}</b> (Tgl ${sw.date}) ${repayText}`; const isMasuk = sw.status === 'Sudah Masuk' || sw.status === 'Sudah Ditebus'; selCol = isMasuk ? 'text-brand-600 bg-brand-50 border-brand-200' : 'text-warning bg-warning/10 border-warning/30';
+                            return `<div class="flex items-start justify-between"><span class="text-[10px] leading-tight flex-1">${narasi}</span> <select onchange="event.stopPropagation(); updateRepayStatus(${sw.id}, this.value)" class="text-[9px] px-1.5 py-0.5 rounded border ${selCol} font-bold outline-none cursor-pointer w-24 shrink-0 mt-0.5"><option value="Belum Masuk" ${sw.status==='Belum Masuk'?'selected':''}>⏳ Belum</option><option value="Sudah Masuk" ${isMasuk?'selected':''}>🏃 Selesai</option></select></div>`;
                         } else {
-                            narasi = `Hutang dinas ke <b>${sw.nurse2.split(',')[0]}</b>`;
-                            const isDone = sw.status === 'Sudah Ditebus';
-                            selCol = isDone ? 'text-success bg-success/10 border-success/20' : 'text-danger bg-danger/10 border-danger/30';
-                            return `<div class="flex items-center justify-between"><span class="text-[10px] leading-tight flex-1">${narasi}</span> <select onchange="event.stopPropagation(); updateRepayStatus(${sw.id}, this.value)" class="text-[9px] px-1.5 py-0.5 rounded border ${selCol} font-bold outline-none cursor-pointer w-24 shrink-0"><option value="Belum Ditebus" ${!isDone?'selected':''}>⏳ Hutang</option><option value="Sudah Ditebus" ${isDone?'selected':''}>✅ Lunas</option></select></div>`;
+                            narasi = `Hutang dinas ke <b>${sw.nurse2.split(',')[0]}</b> (Tgl ${sw.date}) ${repayText}`; const isDone = sw.status === 'Sudah Ditebus'; selCol = isDone ? 'text-success bg-success/10 border-success/20' : 'text-danger bg-danger/10 border-danger/30';
+                            return `<div class="flex items-start justify-between"><span class="text-[10px] leading-tight flex-1">${narasi}</span> <select onchange="event.stopPropagation(); updateRepayStatus(${sw.id}, this.value)" class="text-[9px] px-1.5 py-0.5 rounded border ${selCol} font-bold outline-none cursor-pointer w-24 shrink-0 mt-0.5"><option value="Belum Ditebus" ${!isDone?'selected':''}>⏳ Hutang</option><option value="Sudah Ditebus" ${isDone?'selected':''}>✅ Lunas</option></select></div>`;
                         }
                     }).join('') + `</div>`;
                 }
 
-                tbody.insertAdjacentHTML('beforeend', `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer group" onclick="openHistoryModal('${nurse.name}')">
-                        <td class="py-4 px-4"><div class="flex items-center gap-3">${getLocalAvatar(nurse.name, 'w-8 h-8', 'text-xs')}<span class="font-bold text-sm">${nurse.name.split(',')[0]}</span></div></td>
-                        <td class="py-4 text-center"><span class="inline-flex w-7 h-7 rounded bg-brand-50 text-brand-600 dark:bg-brand-900/30 items-center justify-center font-bold text-xs">${tT}</span></td>
-                        <td class="py-4 text-center"><span class="inline-flex w-7 h-7 rounded bg-warning/10 text-warning items-center justify-center font-bold text-xs">${tS}</span></td>
-                        <td class="py-4 text-center"><span class="inline-flex w-7 h-7 rounded bg-success/10 text-success items-center justify-center font-bold text-xs">${tI}</span></td>
-                        <td class="py-4 px-4 min-w-[250px] max-w-xs">${swapDesc}</td>
-                        <td class="py-4 px-4 text-right no-print"><button class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg group-hover:bg-brand-500 group-hover:text-white transition-all text-slate-400"><i data-lucide="arrow-right" class="w-4 h-4"></i></button></td>
-                    </tr>
-                `);
-            });
-            lucide.createIcons();
+                tbody.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer group" onclick="openHistoryModal('${nurse.name}')"><td class="py-4 px-4"><div class="flex items-center gap-3">${getLocalAvatar(nurse.name, 'w-8 h-8', 'text-xs')}<span class="font-bold text-sm">${nurse.name.split(',')[0]}</span></div></td><td class="py-4 text-center"><span class="inline-flex w-7 h-7 rounded bg-brand-50 text-brand-600 dark:bg-brand-900/30 items-center justify-center font-bold text-xs">${tT}</span></td><td class="py-4 text-center"><span class="inline-flex w-7 h-7 rounded bg-warning/10 text-warning items-center justify-center font-bold text-xs">${tS}</span></td><td class="py-4 text-center"><span class="inline-flex w-7 h-7 rounded bg-success/10 text-success items-center justify-center font-bold text-xs">${tI}</span></td><td class="py-4 px-4 min-w-[250px] max-w-xs">${swapDesc}</td><td class="py-4 px-4 text-right no-print"><button class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg group-hover:bg-brand-500 group-hover:text-white transition-all text-slate-400"><i data-lucide="arrow-right" class="w-4 h-4"></i></button></td></tr>`);
+            }); lucide.createIcons();
         }
 
         function openHistoryModal(nurseName) {
-            document.getElementById('modalHistoryTitle').innerText = nurseName;
-            document.getElementById('modalHistoryAvatar').innerHTML = getLocalAvatar(nurseName);
+            document.getElementById('modalHistoryTitle').innerText = nurseName; document.getElementById('modalHistoryAvatar').innerHTML = getLocalAvatar(nurseName);
             const tbody = document.getElementById('modalHistoryBody'); const emptyMsg = document.getElementById('modalHistoryEmpty');
             tbody.innerHTML = ''; const myLogs = actionsLog.filter(l => l.nurse1 === nurseName || l.nurse2 === nurseName).reverse();
             
@@ -1124,37 +825,19 @@
             else {
                 emptyMsg.classList.add('hidden'); emptyMsg.classList.remove('flex');
                 myLogs.forEach(log => {
-                    let isSwap = log.type === 'Tukar Dinas';
-                    let desc = log.type; let icon = isSwap ? 'arrow-left-right' : 'alert-circle';
+                    let isSwap = log.type === 'Tukar Dinas'; let desc = log.type; let icon = isSwap ? 'arrow-left-right' : 'alert-circle';
                     let colorCls = isSwap ? 'text-brand-500 bg-brand-50 border border-brand-200' : 'text-warning bg-warning/10 border border-warning/20';
                     let interactHtml = `<p class="text-[11px] text-slate-500 mt-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-lg"><i>"${log.notes}"</i></p>`;
 
                     if(isSwap) {
-                        const isN1 = log.nurse1 === nurseName; const target = isN1 ? log.nurse2 : log.nurse1;
-                        desc = `Tukar dinas dengan ${target.split(',')[0]}`;
+                        const isN1 = log.nurse1 === nurseName; const target = isN1 ? log.nurse2 : log.nurse1; desc = `Tukar dinas dengan ${target.split(',')[0]}`;
                         const isDone = log.status === 'Sudah Ditebus'; const isMasuk = log.status === 'Sudah Masuk' || isDone;
-                        
                         let selHtml = "";
-                        if (!isN1) {
-                            selHtml = `<select onchange="updateRepayStatus(${log.id}, this.value)" class="text-[11px] px-2 py-1 rounded border outline-none font-bold ${isMasuk?'bg-brand-50 text-brand-600 border-brand-200':'bg-warning/10 text-warning border-warning/30'}"><option value="Belum Masuk" ${log.status==='Belum Masuk'?'selected':''}>Belum Selesai</option><option value="Sudah Masuk" ${isMasuk?'selected':''}>Selesai Menggantikan</option></select>`;
-                        } else {
-                            selHtml = `<select onchange="updateRepayStatus(${log.id}, this.value)" class="text-[11px] px-2 py-1 rounded border outline-none font-bold ${isDone?'bg-success/10 text-success border-success/20':'bg-danger/10 text-danger border-danger/30'}"><option value="Belum Ditebus" ${!isDone?'selected':''}>Belum Lunas</option><option value="Sudah Ditebus" ${isDone?'selected':''}>Hutang Lunas</option></select>`;
-                        }
+                        if (!isN1) { selHtml = `<select onchange="updateRepayStatus(${log.id}, this.value)" class="text-[11px] px-2 py-1 rounded border outline-none font-bold ${isMasuk?'bg-brand-50 text-brand-600 border-brand-200':'bg-warning/10 text-warning border-warning/30'}"><option value="Belum Masuk" ${log.status==='Belum Masuk'?'selected':''}>Belum Selesai</option><option value="Sudah Masuk" ${isMasuk?'selected':''}>Selesai Menggantikan</option></select>`; } 
+                        else { selHtml = `<select onchange="updateRepayStatus(${log.id}, this.value)" class="text-[11px] px-2 py-1 rounded border outline-none font-bold ${isDone?'bg-success/10 text-success border-success/20':'bg-danger/10 text-danger border-danger/30'}"><option value="Belum Ditebus" ${!isDone?'selected':''}>Belum Lunas</option><option value="Sudah Ditebus" ${isDone?'selected':''}>Hutang Lunas</option></select>`; }
                         interactHtml = `<p class="text-[11px] text-slate-500 my-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-lg"><i>"${log.notes}"</i></p><div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/50"><span class="text-[10px] font-bold uppercase text-slate-400">Update Status:</span> ${selHtml}</div>`;
                     }
-                    
-                    tbody.insertAdjacentHTML('beforeend', `
-                        <div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/30 flex gap-4 shadow-sm hover:shadow-md transition-all">
-                            <div class="w-10 h-10 rounded-xl ${colorCls} flex items-center justify-center shrink-0"><i data-lucide="${icon}" class="w-5 h-5"></i></div>
-                            <div class="flex-1">
-                                <div class="flex justify-between items-start">
-                                    <div><h4 class="font-bold text-sm text-slate-800 dark:text-white">${desc}</h4><p class="text-[10px] font-bold text-slate-400 mt-0.5"><i data-lucide="calendar" class="w-3 h-3 inline"></i> Tgl Awal ${log.date} Jun</p></div>
-                                    <div class="flex gap-1"><button onclick="editAction(${log.id})" class="text-slate-400 hover:text-brand-500 bg-slate-50 dark:bg-slate-800 p-1.5 rounded-md"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteAction(${log.id})" class="text-slate-400 hover:text-danger bg-slate-50 dark:bg-slate-800 p-1.5 rounded-md"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>
-                                </div>
-                                ${interactHtml}
-                            </div>
-                        </div>
-                    `);
+                    tbody.insertAdjacentHTML('beforeend', `<div class="p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/30 flex gap-4 shadow-sm hover:shadow-md transition-all"><div class="w-10 h-10 rounded-xl ${colorCls} flex items-center justify-center shrink-0"><i data-lucide="${icon}" class="w-5 h-5"></i></div><div class="flex-1"><div class="flex justify-between items-start"><div><h4 class="font-bold text-sm text-slate-800 dark:text-white">${desc}</h4><p class="text-[10px] font-bold text-slate-400 mt-0.5"><i data-lucide="calendar" class="w-3 h-3 inline"></i> Tgl Awal ${log.date} Jun</p></div><div class="flex gap-1"><button onclick="editAction(${log.id})" class="text-slate-400 hover:text-brand-500 bg-slate-50 dark:bg-slate-800 p-1.5 rounded-md"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="deleteAction(${log.id})" class="text-slate-400 hover:text-danger bg-slate-50 dark:bg-slate-800 p-1.5 rounded-md"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>${interactHtml}</div></div>`);
                 }); lucide.createIcons();
             }
             document.getElementById('modalHistory').classList.remove('hidden');
@@ -1164,14 +847,14 @@
             const log = actionsLog.find(l => l.id === actionId); if(!log) return;
             document.getElementById('actionNurse').value = log.nurse1; document.getElementById('actionDate').value = log.date; document.getElementById('actionType').value = log.type;
             toggleSwapFields();
-            if(log.type === 'Tukar Dinas') { document.getElementById('actionSwapWith').value = log.nurse2; document.getElementById('actionRepayDate').value = log.repayDate || ''; document.getElementById('actionStatus').value = log.status || 'Belum Masuk'; }
+            if(log.type === 'Tukar Dinas') { 
+                document.getElementById('actionSwapWith').value = log.nurse2; updateRequesterOptions(); document.getElementById('actionRequester').value = log.requester || log.nurse1; document.getElementById('actionRepayDate').value = log.repayDate || ''; document.getElementById('actionStatus').value = log.status || 'Belum Masuk'; 
+            }
             document.getElementById('actionNotes').value = log.notes; document.getElementById('editActionId').value = actionId;
             previewShift(); closeHistoryModal(); switchView('aksi'); window.scrollTo({ top: 0, behavior: 'smooth' }); showToast("Mode Edit: Silakan perbaiki dan tekan Simpan");
         }
 
-        function updateRepayStatus(actionId, newStatus) {
-            const log = actionsLog.find(l => l.id === actionId); if (log) { log.status = newStatus; saveState(); syncData(); showToast(`Status diperbarui`); }
-        }
+        function updateRepayStatus(actionId, newStatus) { const log = actionsLog.find(l => l.id === actionId); if (log) { log.status = newStatus; saveState(); syncData(); showToast(`Status diperbarui`); } }
         function closeHistoryModal() { document.getElementById('modalHistory').classList.add('hidden'); }
 
         function deleteAction(actionId, isSilent = false) {
@@ -1183,185 +866,90 @@
             if(!isSilent) { saveState(); showToast("Aksi Dihapus & Jadwal Dikembalikan"); closeHistoryModal(); syncData(); }
         }
 
-        // --- 5. TIMELINE ANALITIK ---
         function renderAnalyticsTimeline() {
-            const container = document.getElementById('analyticsTimeline');
-            if(!container) return; container.innerHTML = '';
-            
+            const container = document.getElementById('analyticsTimeline'); if(!container) return; container.innerHTML = '';
             const sortedLogs = actionsLog.slice().reverse();
-            if(sortedLogs.length === 0) {
-                container.innerHTML = '<div class="text-slate-400 text-sm ml-4 italic">Belum ada aktivitas di sistem.</div>'; return;
-            }
+            if(sortedLogs.length === 0) { container.innerHTML = '<div class="text-slate-400 text-sm ml-4 italic">Belum ada aktivitas di sistem.</div>'; return; }
 
             sortedLogs.forEach(log => {
-                let isSwap = log.type === 'Tukar Dinas';
-                let icon = isSwap ? 'arrow-left-right' : 'alert-circle';
+                let isSwap = log.type === 'Tukar Dinas'; let icon = isSwap ? 'arrow-left-right' : 'alert-circle';
                 let colorRing = isSwap ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-warning bg-warning/10 text-warning';
                 let title = isSwap ? `${log.nurse1.split(',')[0]} menukar dinas` : `${log.nurse1.split(',')[0]} mengajukan ${log.type}`;
                 let desc = isSwap ? `Menggantikan <b>${log.nurse2.split(',')[0]}</b> (Shift: ${log.originalShift1})` : `Absen pada shift ${log.originalShift1}`;
                 let statusBadge = '';
-
                 if(isSwap) {
-                    const isDone = log.status === 'Sudah Ditebus';
-                    statusBadge = isDone ? `<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-success/10 text-success border border-success/20 ml-2">LUNAS</span>` : `<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-warning/10 text-warning border border-warning/20 ml-2">PROSES</span>`;
+                    const isDone = log.status === 'Sudah Ditebus'; statusBadge = isDone ? `<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-success/10 text-success border border-success/20 ml-2">LUNAS</span>` : `<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-warning/10 text-warning border border-warning/20 ml-2">PROSES</span>`;
                 }
-
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="relative pl-8 pb-8 group">
-                        <span class="absolute left-[-11px] top-1 w-6 h-6 rounded-full border-4 border-white dark:border-slate-900 ${colorRing} flex items-center justify-center z-10 shadow-sm transition-transform group-hover:scale-125"><i data-lucide="${icon}" class="w-3 h-3"></i></span>
-                        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
-                            <div class="flex justify-between items-start mb-1">
-                                <h4 class="text-sm font-bold text-slate-800 dark:text-white">${title} ${statusBadge}</h4>
-                                <span class="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded">Tgl ${log.date} Jun</span>
-                            </div>
-                            <p class="text-[11px] text-slate-600 dark:text-slate-300 mb-2">${desc}</p>
-                            <p class="text-[10px] text-slate-400 italic">" ${log.notes} "</p>
-                        </div>
-                    </div>
-                `);
-            });
-            lucide.createIcons();
+                container.insertAdjacentHTML('beforeend', `<div class="relative pl-8 pb-8 group"><span class="absolute left-[-11px] top-1 w-6 h-6 rounded-full border-4 border-white dark:border-slate-900 ${colorRing} flex items-center justify-center z-10 shadow-sm transition-transform group-hover:scale-125"><i data-lucide="${icon}" class="w-3 h-3"></i></span><div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all"><div class="flex justify-between items-start mb-1"><h4 class="text-sm font-bold text-slate-800 dark:text-white">${title} ${statusBadge}</h4><span class="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded">Tgl ${log.date} Jun</span></div><p class="text-[11px] text-slate-600 dark:text-slate-300 mb-2">${desc}</p><p class="text-[10px] text-slate-400 italic">" ${log.notes} "</p></div></div>`);
+            }); lucide.createIcons();
         }
 
-        // --- SISTEM PENGATURAN ---
         function applySettingsToDOM() {
             const headDisplay = settingsApp.karuName || "Admin";
-            document.getElementById('headerHeadName').innerText = headDisplay;
-            document.getElementById('headerAvatarContainer').innerHTML = getLocalAvatar(headDisplay, 'w-10 h-10', 'text-sm shadow-md border-2 border-white dark:border-slate-800');
-            document.getElementById('headerAvatarContainer').innerHTML += '<div class="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-white dark:border-slate-800 shadow-glow-success"></div>';
-
+            document.getElementById('headerHeadName').innerText = headDisplay; document.getElementById('headerAvatarContainer').innerHTML = getLocalAvatar(headDisplay, 'w-10 h-10', 'text-sm shadow-md border-2 border-white dark:border-slate-800'); document.getElementById('headerAvatarContainer').innerHTML += '<div class="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-white dark:border-slate-800 shadow-glow-success"></div>';
             document.getElementById('setKapusName').value = settingsApp.kapusName || ''; document.getElementById('setKaperName').value = settingsApp.kaperName || ''; document.getElementById('setKaruName').value = settingsApp.karuName || '';
         }
 
-        function saveSettings() {
-            settingsApp.kapusName = document.getElementById('setKapusName').value; settingsApp.kaperName = document.getElementById('setKaperName').value; settingsApp.karuName  = document.getElementById('setKaruName').value;
-            saveState(); applySettingsToDOM(); showToast("Pengaturan Disimpan");
-        }
+        function saveSettings() { settingsApp.kapusName = document.getElementById('setKapusName').value; settingsApp.kaperName = document.getElementById('setKaperName').value; settingsApp.karuName  = document.getElementById('setKaruName').value; saveState(); applySettingsToDOM(); showToast("Pengaturan Disimpan"); }
 
         function renderSettingsNurses() {
             const grid = document.getElementById('settingsNursesGrid'); if(!grid) return; grid.innerHTML = '';
-            nurses.forEach((n, idx) => {
-                grid.insertAdjacentHTML('beforeend', `<div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus-within:border-brand-500 transition-all"><input type="text" id="editNurse_${idx}" value="${n.name}" class="flex-1 px-3 py-2 text-sm bg-transparent outline-none font-semibold"><button onclick="updateNurseName('${n.name}', document.getElementById('editNurse_${idx}').value)" class="p-2 text-white bg-slate-800 dark:bg-white dark:text-slate-900 hover:bg-brand-500 dark:hover:bg-brand-500 hover:text-white rounded-lg transition-colors"><i data-lucide="check" class="w-4 h-4"></i></button></div>`);
-            }); lucide.createIcons();
+            nurses.forEach((n, idx) => { grid.insertAdjacentHTML('beforeend', `<div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus-within:border-brand-500 transition-all"><input type="text" id="editNurse_${idx}" value="${n.name}" class="flex-1 px-3 py-2 text-sm bg-transparent outline-none font-semibold"><button onclick="updateNurseName('${n.name}', document.getElementById('editNurse_${idx}').value)" class="p-2 text-white bg-slate-800 dark:bg-white dark:text-slate-900 hover:bg-brand-500 dark:hover:bg-brand-500 hover:text-white rounded-lg transition-colors"><i data-lucide="check" class="w-4 h-4"></i></button></div>`); }); lucide.createIcons();
         }
 
         function updateNurseName(oldName, newName) {
             if(!newName || oldName === newName) return; let n = nurses.find(n => n.name === oldName); if(n) n.name = newName;
-            actionsLog.forEach(log => { if(log.nurse1 === oldName) log.nurse1 = newName; if(log.nurse2 === oldName) log.nurse2 = newName; });
-            saveState(); syncData(); showToast(`Nama diperbarui`);
+            actionsLog.forEach(log => { if(log.nurse1 === oldName) log.nurse1 = newName; if(log.nurse2 === oldName) log.nurse2 = newName; }); saveState(); syncData(); showToast(`Nama diperbarui`);
         }
 
         function backupData() {
-            try {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(new Blob([JSON.stringify({ nurses, actionsLog, settingsApp }, null, 2)], { type: 'application/json' }));
-                a.download = `dduo_backup_${new Date().toISOString().slice(0,10)}.json`;
-                a.click(); URL.revokeObjectURL(a.href); showToast("File Backup Diunduh!");
-            } catch (err) { showToast("Gagal membuat backup"); }
+            try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ nurses, actionsLog, settingsApp }, null, 2)], { type: 'application/json' })); a.download = `dduo_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); showToast("File Backup Diunduh!"); } catch (err) { showToast("Gagal membuat backup"); }
         }
 
         function restoreData(event) {
-            const file = event.target.files[0]; if (!file) return; event.target.value = '';
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result); if (!imported.nurses) throw new Error('Format salah');
-                    nurses = imported.nurses; actionsLog = imported.actionsLog || []; settingsApp = imported.settingsApp || defaultSettings;
-                    saveState(); applySettingsToDOM(); syncData(); showToast(`Restore berhasil!`);
-                } catch(err) { showToast('Gagal restore data'); }
-            }; reader.readAsText(file);
+            const file = event.target.files[0]; if (!file) return; event.target.value = ''; const reader = new FileReader();
+            reader.onload = function(e) { try { const imported = JSON.parse(e.target.result); if (!imported.nurses) throw new Error('Format salah'); nurses = imported.nurses; actionsLog = imported.actionsLog || []; settingsApp = imported.settingsApp || defaultSettings; saveState(); applySettingsToDOM(); syncData(); showToast(`Restore berhasil!`); } catch(err) { showToast('Gagal restore data'); } }; reader.readAsText(file);
         }
 
-        // --- SISTEM PARSER PDF JADWAL ---
         async function handlePDFUpload(event) {
-            const file = event.target.files[0]; if (!file) return;
-            showToast("Membaca PDF... Mohon tunggu sebentar", 4000);
-            
-            // Set worker PDF.js
+            const file = event.target.files[0]; if (!file) return; showToast("Membaca PDF... Mohon tunggu sebentar", 4000);
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-            
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const typedarray = new Uint8Array(e.target.result);
                 try {
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    let fullText = "";
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const textContent = await page.getTextContent();
-                        fullText += textContent.items.map(item => item.str).join(" ") + " ";
-                    }
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise; let fullText = "";
+                    for (let i = 1; i <= pdf.numPages; i++) { const page = await pdf.getPage(i); const textContent = await page.getTextContent(); fullText += textContent.items.map(item => item.str).join(" ") + " "; }
                     parseScheduleFromText(fullText);
-                } catch(err) {
-                    console.error("PDF Parsing Error:", err);
-                    showToast("Gagal membaca PDF. Pastikan format teks bisa dibaca.");
-                }
-                event.target.value = ''; // Reset input
-            };
-            reader.readAsArrayBuffer(file);
+                } catch(err) { console.error("PDF Parsing Error:", err); showToast("Gagal membaca PDF. Pastikan format teks bisa dibaca."); }
+                event.target.value = ''; 
+            }; reader.readAsArrayBuffer(file);
         }
 
         function parseScheduleFromText(text) {
-            let updatedCount = 0;
-            const normalizedText = text.replace(/\s+/g, ' '); 
-            
+            let updatedCount = 0; const normalizedText = text.replace(/\s+/g, ' '); 
             nurses.forEach((nurse, index) => {
-                const nameKey = nurse.name.split(',')[0].trim();
-                const nameIdx = normalizedText.indexOf(nameKey);
-                
+                const nameKey = nurse.name.split(',')[0].trim(); const nameIdx = normalizedText.indexOf(nameKey);
                 if(nameIdx !== -1) {
-                    const afterName = normalizedText.substring(nameIdx + nameKey.length).trim();
-                    let shiftsFound = [];
-                    const tokens = afterName.split(/\s+/);
-                    
+                    const afterName = normalizedText.substring(nameIdx + nameKey.length).trim(); let shiftsFound = []; const tokens = afterName.split(/\s+/);
                     for(let token of tokens) {
-                        // Hilangkan tanda baca (titik, koma) agar lebih bersih
                         const cleanToken = token.toUpperCase().replace(/[^A-Z]/g, '');
-                        
-                        // FIKSASI UTAMA: 
-                        // Hanya ambil kata yang MURNI berisi huruf P, S, M, atau L.
-                        // Tolak kata biasa (seperti AMDKEP, SKEP, SILIAN) agar hurufnya tidak ikut terbaca.
                         if (cleanToken.length > 0 && /^[PSML]+$/.test(cleanToken)) {
-                            for(let char of cleanToken) {
-                                shiftsFound.push(char);
-                                if(shiftsFound.length === 30) break;
-                            }
+                            for(let char of cleanToken) { shiftsFound.push(char); if(shiftsFound.length === 30) break; }
                         }
                         if(shiftsFound.length === 30) break;
                     }
-                    
-                    if(shiftsFound.length >= 28) {
-                        while(shiftsFound.length < 30) shiftsFound.push('L'); 
-                        nurses[index].schedule = shiftsFound.slice(0, 30);
-                        updatedCount++;
-                    }
+                    if(shiftsFound.length >= 28) { while(shiftsFound.length < 30) shiftsFound.push('L'); nurses[index].schedule = shiftsFound.slice(0, 30); updatedCount++; }
                 }
             });
-            
-            if(updatedCount > 0) {
-                saveState(); syncData();
-                showToast(`Sukses! Jadwal ${updatedCount} perawat berhasil disinkronkan.`);
-            } else {
-                showToast("Gagal: Format PDF tidak sesuai atau nama perawat tidak cocok.");
-            }
+            if(updatedCount > 0) { saveState(); syncData(); showToast(`Sukses! Jadwal ${updatedCount} perawat berhasil disinkronkan.`); } else { showToast("Gagal: Format PDF tidak sesuai atau nama perawat tidak cocok."); }
         }
 
-        // --- FUNGSI TOAST NOTIFIKASI ---
         let toastTimeout;
         function showToast(message, duration = 3000) {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toastMsg');
-            if(!toast || !msgEl) return;
-            
-            clearTimeout(toastTimeout);
-            msgEl.innerText = message;
-            toast.classList.remove('opacity-0', '-translate-y-20');
-            toast.classList.add('opacity-100', 'translate-y-0');
-            
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', '-translate-y-20');
-            }, duration);
+            const toast = document.getElementById('toast'); const msgEl = document.getElementById('toastMsg'); if(!toast || !msgEl) return;
+            clearTimeout(toastTimeout); msgEl.innerText = message; toast.classList.remove('opacity-0', '-translate-y-20'); toast.classList.add('opacity-100', 'translate-y-0');
+            toastTimeout = setTimeout(() => { toast.classList.remove('opacity-100', 'translate-y-0'); toast.classList.add('opacity-0', '-translate-y-20'); }, duration);
         }
 
         function renderNurseCards(searchQuery = '') {
@@ -1370,41 +958,23 @@
                 if (searchQuery && !nurse.name.toLowerCase().includes(searchQuery)) return;
                 const totals = { P: 0, S: 0, M: 0, L: 0 }; nurse.schedule.forEach(s => { if(totals[s] !== undefined) totals[s]++; });
                 const totalKerja = totals.P + totals.S + totals.M; const progress = Math.min((totalKerja / 26) * 100, 100); 
-                
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="glass-card rounded-[24px] p-6 card-lift relative overflow-hidden group border border-slate-200 dark:border-slate-700">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                        <div class="relative z-10 flex items-start justify-between mb-6">
-                            <div class="flex items-center gap-4">
-                                ${getLocalAvatar(nurse.name, 'w-14 h-14', 'text-xl shadow-md border-2 border-white dark:border-slate-800')}
-                                <div>
-                                    <h4 class="font-display font-bold text-slate-800 dark:text-white leading-tight">${nurse.name.split(',')[0]}</h4>
-                                    <p class="text-[10px] text-slate-500 mt-0.5">${nurse.name.includes(',') ? nurse.name.split(',')[1].trim() : 'Perawat Pelaksana'}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-y-4 relative z-10">
-                            <div>
-                                <div class="flex justify-between text-[11px] font-bold uppercase tracking-wider mb-2"><span class="text-slate-400">Total Shift</span><span class="text-brand-600">${totalKerja} Hari</span></div>
-                                <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                    <div class="h-full bg-gradient-to-r from-brand-400 to-indigo-500 rounded-full" style="width: ${progress}%"></div>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-4 gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                                <div class="text-center p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20"><p class="text-[10px] font-bold text-blue-400">P</p><p class="font-bold text-blue-600">${totals.P}</p></div>
-                                <div class="text-center p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20"><p class="text-[10px] font-bold text-amber-400">S</p><p class="font-bold text-amber-600">${totals.S}</p></div>
-                                <div class="text-center p-2 rounded-xl bg-purple-50 dark:bg-purple-900/20"><p class="text-[10px] font-bold text-purple-400">M</p><p class="font-bold text-purple-600">${totals.M}</p></div>
-                                <div class="text-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50"><p class="text-[10px] font-bold text-slate-400">L</p><p class="font-bold text-slate-600">${totals.L}</p></div>
-                            </div>
-                        </div>
-                    </div>
-                `);
+                container.insertAdjacentHTML('beforeend', `<div class="glass-card rounded-[24px] p-6 card-lift relative overflow-hidden group border border-slate-200 dark:border-slate-700"><div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div><div class="relative z-10 flex items-start justify-between mb-6"><div class="flex items-center gap-4">${getLocalAvatar(nurse.name, 'w-14 h-14', 'text-xl shadow-md border-2 border-white dark:border-slate-800')}<div><h4 class="font-display font-bold text-slate-800 dark:text-white leading-tight">${nurse.name.split(',')[0]}</h4><p class="text-[10px] text-slate-500 mt-0.5">${nurse.name.includes(',') ? nurse.name.split(',')[1].trim() : 'Perawat Pelaksana'}</p></div></div></div><div class="space-y-4 relative z-10"><div><div class="flex justify-between text-[11px] font-bold uppercase tracking-wider mb-2"><span class="text-slate-400">Total Shift</span><span class="text-brand-600">${totalKerja} Hari</span></div><div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-400 to-indigo-500 rounded-full" style="width: ${progress}%"></div></div></div><div class="grid grid-cols-4 gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50"><div class="text-center p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20"><p class="text-[10px] font-bold text-blue-400">P</p><p class="font-bold text-blue-600">${totals.P}</p></div><div class="text-center p-2 rounded-xl bg-amber-50 dark:bg-amber-900/20"><p class="text-[10px] font-bold text-amber-400">S</p><p class="font-bold text-amber-600">${totals.S}</p></div><div class="text-center p-2 rounded-xl bg-purple-50 dark:bg-purple-900/20"><p class="text-[10px] font-bold text-purple-400">M</p><p class="font-bold text-purple-600">${totals.M}</p></div><div class="text-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50"><p class="text-[10px] font-bold text-slate-400">L</p><p class="font-bold text-slate-600">${totals.L}</p></div></div></div></div>`);
             });
         }
 
         function printIntegritas() {
-            alert("Mencetak laporan (simulasi pop-up pdf)...");
-            // Kodenya sama dengan yang sebelumnya, disingkat untuk keterbacaan di platform ini
+            let printWin = window.open('', '_blank');
+            let html = `<html><head><title>Laporan Integritas Jadwal</title><style>body { font-family: sans-serif; padding: 20px; } table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; } th, td { border: 1px solid #ccc; padding: 8px; text-align: left; } th { background: #eee; }</style></head><body><h2>Laporan Integritas Penukaran Jadwal</h2><table><thead><tr><th>Nama Pegawai</th><th>Tukar Dinas</th><th>Sakit</th><th>Izin</th></tr></thead><tbody>`;
+            nurses.forEach(nurse => {
+                let tT=0, tS=0, tI=0;
+                actionsLog.forEach(log => {
+                    if (log.nurse1 === nurse.name || log.nurse2 === nurse.name) { if (log.type === 'Tukar Dinas') tT++; }
+                    if (log.nurse1 === nurse.name) { if (log.type === 'Sakit') tS++; if (log.type === 'Izin') tI++; }
+                });
+                html += `<tr><td>${nurse.name}</td><td>${tT}</td><td>${tS}</td><td>${tI}</td></tr>`;
+            });
+            html += `</tbody></table><script>window.onload=function(){window.print(); setTimeout(()=>window.close(), 500);}<\/script></body></html>`;
+            printWin.document.write(html); printWin.document.close();
         }
     </script>
 </body>
