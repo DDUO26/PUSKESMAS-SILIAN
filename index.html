@@ -61,8 +61,11 @@
     <!-- FLOATING APP WRAPPER -->
     <div class="flex w-full h-full p-2 md:p-4 gap-4">
         
+        <!-- MOBILE OVERLAY -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity" onclick="toggleMobileMenu()"></div>
+
         <!-- SIDEBAR -->
-        <aside class="hidden md:flex w-[280px] flex-col h-full rounded-[24px] glass-panel z-40 relative overflow-hidden flex-shrink-0">
+        <aside id="appSidebar" class="fixed md:relative inset-y-0 left-0 z-50 w-[280px] transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full rounded-r-[24px] md:rounded-[24px] glass-panel overflow-hidden flex-shrink-0">
             <div class="p-6 flex flex-col gap-3 border-b border-slate-200/50 dark:border-slate-700/50 relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-brand-500/10 blur-3xl rounded-full"></div>
                 <div class="flex items-center gap-3 relative z-10">
@@ -107,7 +110,7 @@
             
             <header class="h-20 px-6 lg:px-8 flex items-center justify-between glass-panel rounded-t-[24px] md:rounded-[24px] border-b-0 md:mb-4 z-30 flex-shrink-0 relative">
                 <div class="flex items-center gap-4">
-                    <button class="md:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><i data-lucide="menu"></i></button>
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"><i data-lucide="menu"></i></button>
                     <div>
                         <h2 id="greetingText" class="text-lg font-display font-bold text-slate-800 dark:text-white">Workspace</h2>
                         <p id="currentDateText" class="text-[11px] font-bold tracking-wider uppercase text-brand-500 dark:text-brand-400 flex items-center gap-1.5 mt-0.5"><i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i> <span>Memuat...</span></p>
@@ -471,6 +474,14 @@
             else { const pin = prompt("Masukkan PIN Admin:"); const correctPin = settingsApp.adminPin || "123456"; if (pin === correctPin) { isAdmin = true; sessionStorage.setItem('dduo_admin', 'true'); showToast("Akses Diberikan!"); updateAdminUI(); } else if (pin !== null) { showToast("PIN Salah!"); } }
         }
 
+        // FUNGSI TOGGLE MENU MOBILE
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons(); loadState();
             const updateClock = () => { const now = new Date(); document.getElementById('currentDateText').innerHTML = `<i data-lucide="clock" class="w-3.5 h-3.5"></i> <span>${now.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'short'})} • ${now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>`; if(document.getElementById('dashHeroShiftTime')) { const h = now.getHours(); let shift = 'Malam'; if(h>=7 && h<14) shift = 'Pagi'; else if(h>=14 && h<21) shift = 'Sore'; document.getElementById('dashHeroShiftInfo').innerHTML = `${shift} <span class="text-sm text-brand-200 mb-1 font-sans opacity-70">${now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>`; } };
@@ -493,6 +504,17 @@
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById('view-' + viewId).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(btn => { if(btn.getAttribute('onclick').includes(viewId)) { btn.classList.add('active'); btn.classList.remove('text-slate-500', 'dark:text-slate-400'); } else { btn.classList.remove('active'); btn.classList.add('text-slate-500', 'dark:text-slate-400'); } });
+            
+            // Auto close mobile menu if opened
+            if(window.innerWidth < 768) {
+                const sidebar = document.getElementById('appSidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if(sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                    sidebar.classList.add('-translate-x-full');
+                    if(overlay) overlay.classList.add('hidden');
+                }
+            }
+
             if(viewId === 'dashboard') setTimeout(renderDashboardOverview, 50);
         }
 
